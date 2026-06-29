@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>中文工具箱 · Chinese Text Toolbox</title>
+  <meta name="description" content="純前端中文文字處理工具箱：字數統計、繁簡轉換、拼音粵拼、農曆、倉頡、單位換算等。">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🀄</text></svg>">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="theme-light">
+  <div id="app">
+    <nav id="sidebar">
+      <div id="sidebar-header">
+        <span id="logo">🀄 中文工具箱</span>
+        <button id="theme-toggle" aria-label="切換主題" title="切換深色／淺色">🌙</button>
+        <button id="sidebar-close" aria-label="關閉選單">✕</button>
+      </div>
+      <input id="tool-search" type="search" placeholder="搜尋工具…" aria-label="搜尋工具">
+      <ul id="nav-list">
+        <li class="nav-category">文字處理</li>
+        <li class="nav-item" data-tool="wordcount">字數統計</li>
+        <li class="nav-item" data-tool="fullwidth">全形／半形轉換</li>
+        <li class="nav-item" data-tool="punctuation">標點格式化</li>
+        <li class="nav-item" data-tool="whitespace">清除多餘空白</li>
+
+        <li class="nav-category">語言</li>
+        <li class="nav-item" data-tool="romanize">拼音／粵拼</li>
+        <li class="nav-item" data-tool="converter">繁簡轉換</li>
+
+        <li class="nav-category">格式轉換</li>
+        <li class="nav-item" data-tool="markdown">Markdown 預覽</li>
+        <li class="nav-item" data-tool="csv">CSV 表格</li>
+        <li class="nav-item" data-tool="json">JSON 格式化</li>
+        <li class="nav-item" data-tool="chinesenum">中文數字</li>
+
+        <li class="nav-category">實用工具</li>
+        <li class="nav-item" data-tool="qrcode">QR Code 生成</li>
+        <li class="nav-item" data-tool="timezone">時區轉換</li>
+        <li class="nav-item" data-tool="units">單位換算</li>
+        <li class="nav-item" data-tool="unshorten">短網址還原</li>
+
+        <li class="nav-category">中文特色</li>
+        <li class="nav-item" data-tool="lunar">農曆／公曆</li>
+        <li class="nav-item" data-tool="cangjie">倉頡／速成</li>
+
+        <li class="nav-category">額外工具</li>
+        <li class="nav-item" data-tool="base64">Base64 編碼</li>
+        <li class="nav-item" data-tool="urlencode">URL 編碼</li>
+        <li class="nav-item" data-tool="mojibake">亂碼修復</li>
+        <li class="nav-item" data-tool="unicode">Unicode 查詢</li>
+        <li class="nav-item" data-tool="charfreq">字頻分析</li>
+      </ul>
+      <div id="sidebar-footer">純前端 · 本地運行 · 無需後端</div>
+    </nav>
+
+    <button id="hamburger" aria-label="開啟選單">☰</button>
+    <div id="backdrop"></div>
+
+    <main id="content">
+      <section id="panel-home" class="tool-panel">
+        <h1>🀄 歡迎使用中文工具箱</h1>
+        <p class="tool-desc">21 個純前端工具，全部喺你嘅瀏覽器本地運行，無需後端或 API Key。請從左側選單揀工具開始。</p>
+        <div class="home-grid" id="home-grid"></div>
+      </section>
+
+      <section id="panel-wordcount" class="tool-panel" hidden>
+        <h2>字數統計</h2>
+        <p class="tool-desc">統計字元、中文字、詞、段落數量，並估算閱讀時間。</p>
+        <textarea id="wc-input" class="tool-input" rows="12" placeholder="喺度貼上或輸入文字…"></textarea>
+        <div class="stats-grid">
+          <div class="stat-card"><span class="stat-val" id="wc-chars">0</span><span class="stat-lbl">字元（含空白）</span></div>
+          <div class="stat-card"><span class="stat-val" id="wc-nospace">0</span><span class="stat-lbl">字元（不含空白）</span></div>
+          <div class="stat-card"><span class="stat-val" id="wc-cjk">0</span><span class="stat-lbl">中文字</span></div>
+          <div class="stat-card"><span class="stat-val" id="wc-words">0</span><span class="stat-lbl">英文詞</span></div>
+          <div class="stat-card"><span class="stat-val" id="wc-lines">0</span><span class="stat-lbl">行數</span></div>
+          <div class="stat-card"><span class="stat-val" id="wc-paras">0</span><span class="stat-lbl">段落</span></div>
+          <div class="stat-card"><span class="stat-val" id="wc-time">0 分鐘</span><span class="stat-lbl">預估閱讀時間</span></div>
+        </div>
+      </section>
+
+      <section id="panel-fullwidth" class="tool-panel" hidden>
+        <h2>全形／半形轉換</h2>
+        <p class="tool-desc">轉換全形（Ａ１）與半形（A1）字元。</p>
+        <textarea id="fw-input" class="tool-input" rows="8" placeholder="輸入文字…"></textarea>
+        <div class="control-row">
+          <label><input type="checkbox" id="fw-punct" checked> 包含標點符號</label>
+          <button class="btn btn-primary" id="fw-to-half">全形 → 半形</button>
+          <button class="btn btn-primary" id="fw-to-full">半形 → 全形</button>
+        </div>
+        <div class="output-wrap"><button class="copy-btn" data-copy="fw-output">複製</button><textarea id="fw-output" class="tool-output" rows="8" readonly></textarea></div>
+      </section>
+
+      <section id="panel-punctuation" class="tool-panel" hidden>
+        <h2>標點格式化</h2>
+        <p class="tool-desc">統一引號樣式、修正省略號與破折號、清理標點前後空白。</p>
+        <textarea id="pu-input" class="tool-input" rows="8" placeholder="輸入文字…"></textarea>
+        <div class="control-col">
+          <label><input type="checkbox" id="pu-quotes" checked> 直引號 "…" '…' → 中文引號 「…」『…』</label>
+          <label><input type="checkbox" id="pu-ellipsis" checked> 修正省略號 ... → ……</label>
+          <label><input type="checkbox" id="pu-dash" checked> 修正破折號 -- → ——</label>
+          <label><input type="checkbox" id="pu-space" checked> 清除中文標點前後多餘空白</label>
+        </div>
+        <div class="control-row"><button class="btn btn-primary" id="pu-run">格式化</button></div>
+        <div class="output-wrap"><button class="copy-btn" data-copy="pu-output">複製</button><textarea id="pu-output" class="tool-output" rows="8" readonly></textarea></div>
+      </section>
+
+      <section id="panel-whitespace" class="tool-panel" hidden>
+        <h2>清除多餘空白</h2>
+        <p class="tool-desc">移除多餘空白、空行、零寬字元，統一換行符。</p>
+        <textarea id="ws-input" class="tool-input" rows="8" placeholder="輸入文字…"></textarea>
+        <div class="control-col">
+          <label><input type="checkbox" id="ws-trail" checked> 移除每行末端空白</label>
+          <label><input type="checkbox" id="ws-multi" checked> 多個空格合併為一個</label>
+          <label><input type="checkbox" id="ws-blank" checked> 多個連續空行合併為一個</label>
+          <label><input type="checkbox" id="ws-edges" checked> 移除開頭／結尾空行</label>
+          <label><input type="checkbox" id="ws-zwsp" checked> 移除零寬字元</label>
+          <label><input type="checkbox" id="ws-crlf" checked> 統一換行為 LF</label>
+        </div>
+        <div class="control-row"><button class="btn btn-primary" id="ws-run">清除</button></div>
+        <div class="output-wrap"><button class="copy-btn" data-copy="ws-output">複製</button><textarea id="ws-output" class="tool-output" rows="8" readonly></textarea></div>
+      </section>
+
+      <section id="panel-romanize" class="tool-panel" hidden>
+        <h2>拼音／粵拼</h2>
+        <p class="tool-desc">輸入中文字，輸出普通話拼音或粵拼（廣東話）。</p>
+        <textarea id="ro-input" class="tool-input" rows="6" placeholder="輸入中文字，例如：你好世界"></textarea>
+        <div class="control-row">
+          <label>系統：
+            <select id="ro-system">
+              <option value="pinyin">普通話拼音</option>
+              <option value="jyutping">粵拼</option>
+              <option value="both">兩者並列</option>
+            </select>
+          </label>
+          <label>聲調：
+            <select id="ro-tone">
+              <option value="symbol">符號 (mā)</option>
+              <option value="num">數字 (ma1)</option>
+              <option value="none">不標調</option>
+            </select>
+          </label>
+          <label>顯示：
+            <select id="ro-display">
+              <option value="ruby">注音（字上方）</option>
+              <option value="plain">純拼音</option>
+            </select>
+          </label>
+          <button class="btn btn-primary" id="ro-run">轉換</button>
+        </div>
+        <div id="ro-status" class="status-line"></div>
+        <div id="ro-output" class="tool-output rich-output"></div>
+      </section>
+
+      <section id="panel-converter" class="tool-panel" hidden>
+        <h2>繁簡轉換</h2>
+        <p class="tool-desc">繁體（台灣／香港）與簡體中文互相轉換，使用 OpenCC 詞彙級轉換。</p>
+        <textarea id="cv-input" class="tool-input" rows="8" placeholder="輸入文字…"></textarea>
+        <div class="control-row">
+          <label>方向：
+            <select id="cv-mode">
+              <option value="cn|tw">簡體 → 繁體（台灣）</option>
+              <option value="cn|hk">簡體 → 繁體（香港）</option>
+              <option value="tw|cn">繁體（台灣）→ 簡體</option>
+              <option value="hk|cn">繁體（香港）→ 簡體</option>
+              <option value="tw|hk">繁體台灣 → 繁體香港</option>
+              <option value="hk|tw">繁體香港 → 繁體台灣</option>
+            </select>
+          </label>
+          <button class="btn btn-primary" id="cv-run">轉換</button>
+        </div>
+        <div id="cv-status" class="status-line"></div>
+        <div class="output-wrap"><button class="copy-btn" data-copy="cv-output">複製</button><textarea id="cv-output" class="tool-output" rows="8" readonly></textarea></div>
+      </section>
+
+      <section id="panel-markdown" class="tool-panel" hidden>
+        <h2>Markdown 預覽</h2>
+        <p class="tool-desc">即時預覽 Markdown，並可匯出 PDF 或複製 HTML。</p>
+        <div class="control-row">
+          <button class="btn" id="md-copy-html">複製 HTML</button>
+          <button class="btn btn-primary" id="md-pdf">匯出 PDF</button>
+        </div>
+        <div class="split-pane">
+          <textarea id="md-input" class="tool-input" placeholder="# 標題&#10;&#10;在此輸入 Markdown…"></textarea>
+          <div id="md-preview" class="md-preview"></div>
+        </div>
+      </section>
+
+      <section id="panel-csv" class="tool-panel" hidden>
+        <h2>CSV 表格</h2>
+        <p class="tool-desc">將 CSV 文字或檔案解析成表格，並可複製為 Markdown 表格。</p>
+        <textarea id="csv-input" class="tool-input" rows="6" placeholder="貼上 CSV，例如：&#10;姓名,年齡&#10;陳大文,30"></textarea>
+        <div class="control-row">
+          <input type="file" id="csv-file" accept=".csv,.txt">
+          <label><input type="checkbox" id="csv-header" checked> 第一行為標題</label>
+          <button class="btn btn-primary" id="csv-run">解析</button>
+          <button class="btn" id="csv-md">複製為 Markdown 表格</button>
+        </div>
+        <div id="csv-status" class="status-line"></div>
+        <div class="table-wrapper" id="csv-output"></div>
+      </section>
+
+      <section id="panel-json" class="tool-panel" hidden>
+        <h2>JSON 格式化</h2>
+        <p class="tool-desc">格式化、壓縮、驗證 JSON。</p>
+        <textarea id="json-input" class="tool-input" rows="10" placeholder='輸入 JSON，例如：{"name":"陳大文","age":30}'></textarea>
+        <div class="control-row">
+          <label>縮排：
+            <select id="json-indent">
+              <option value="2">2 空格</option>
+              <option value="4">4 空格</option>
+              <option value="\t">Tab</option>
+            </select>
+          </label>
+          <button class="btn btn-primary" id="json-format">格式化</button>
+          <button class="btn" id="json-min">壓縮</button>
+          <button class="btn" id="json-validate">驗證</button>
+        </div>
+        <div id="json-status" class="status-line"></div>
+        <div class="output-wrap"><button class="copy-btn" data-copy="json-output">複製</button><textarea id="json-output" class="tool-output" rows="10" readonly></textarea></div>
+      </section>
+
+      <section id="panel-chinesenum" class="tool-panel" hidden>
+        <h2>中文數字</h2>
+        <p class="tool-desc">阿拉伯數字、中文數字、財務大寫互相轉換。</p>
+        <textarea id="cn-input" class="tool-input" rows="3" placeholder="輸入數字或中文數字，例如：12345 或 一萬二千三百四十五"></textarea>
+        <div class="control-row">
+          <label>模式：
+            <select id="cn-mode">
+              <option value="a2c">阿拉伯 → 中文（一二三）</option>
+              <option value="a2f">阿拉伯 → 財務大寫（壹貳參）</option>
+              <option value="c2a">中文／大寫 → 阿拉伯</option>
+            </select>
+          </label>
+          <button class="btn btn-primary" id="cn-run">轉換</button>
+        </div>
+        <div id="cn-status" class="status-line"></div>
+        <div class="output-wrap"><button class="copy-btn" data-copy="cn-output">複製</button><textarea id="cn-output" class="tool-output" rows="3" readonly></textarea></div>
+      </section>
+
+      <section id="panel-qrcode" class="tool-panel" hidden>
+        <h2>QR Code 生成</h2>
+        <p class="tool-desc">由任意文字或網址生成二維碼，可下載 PNG。</p>
+        <textarea id="qr-input" class="tool-input" rows="4" placeholder="輸入網址或文字…"></textarea>
+        <div class="control-row">
+          <label>尺寸：<select id="qr-size"><option value="128">128</option><option value="256" selected>256</option><option value="512">512</option></select></label>
+          <label>容錯：<select id="qr-level"><option>L</option><option>M</option><option selected>Q</option><option>H</option></select></label>
+          <label>前景：<input type="color" id="qr-fg" value="#000000"></label>
+          <label>背景：<input type="color" id="qr-bg" value="#ffffff"></label>
+          <button class="btn btn-primary" id="qr-run">生成</button>
+          <button class="btn" id="qr-download">下載 PNG</button>
+        </div>
+        <div id="qr-status" class="status-line"></div>
+        <div id="qr-output" class="qr-output"></div>
+      </section>
+
+      <section id="panel-timezone" class="tool-panel" hidden>
+        <h2>時區轉換</h2>
+        <p class="tool-desc">將一個時刻換算成多個時區，並顯示星期。</p>
+        <div class="control-row">
+          <label>日期時間：<input type="datetime-local" id="tz-input"></label>
+          <label>來源時區：<select id="tz-source"></select></label>
+          <button class="btn" id="tz-now">現在</button>
+          <button class="btn btn-primary" id="tz-run">換算</button>
+        </div>
+        <div class="table-wrapper"><table id="tz-output" class="data-table"></table></div>
+      </section>
+
+      <section id="panel-units" class="tool-panel" hidden>
+        <h2>單位換算</h2>
+        <p class="tool-desc">長度、重量、溫度、面積換算，包括港式單位（斤、両、呎）。</p>
+        <div class="control-row" id="unit-tabs"></div>
+        <div class="control-row">
+          <input type="number" id="unit-value" class="tool-input" value="1" style="max-width:160px">
+          <label>由 <select id="unit-from"></select></label>
+        </div>
+        <div class="table-wrapper"><table id="unit-output" class="data-table"></table></div>
+      </section>
+
+      <section id="panel-unshorten" class="tool-panel" hidden>
+        <h2>短網址還原</h2>
+        <p class="tool-desc">嘗試將短網址還原成完整 URL。</p>
+        <div class="alert alert-warn">⚠️ 純前端受瀏覽器 CORS 限制，部分短網址服務無法直接讀取。可選用公開 CORS 代理（需自行承擔風險）。</div>
+        <div class="control-row">
+          <input type="url" id="us-input" class="tool-input" placeholder="https://bit.ly/xxxx" style="flex:1">
+        </div>
+        <div class="control-row">
+          <label><input type="checkbox" id="us-proxy"> 使用 CORS 代理（corsproxy.io）</label>
+          <button class="btn btn-primary" id="us-run">還原</button>
+        </div>
+        <div id="us-status" class="status-line"></div>
+        <div class="output-wrap"><button class="copy-btn" data-copy="us-output">複製</button><textarea id="us-output" class="tool-output" rows="3" readonly></textarea></div>
+      </section>
+
+      <section id="panel-lunar" class="tool-panel" hidden>
+        <h2>農曆／公曆換算</h2>
+        <p class="tool-desc">公曆與農曆互相換算，顯示星期、生肖、干支、節氣。</p>
+        <div class="control-row">
+          <label>方向：
+            <select id="lu-mode">
+              <option value="s2l">公曆 → 農曆</option>
+              <option value="l2s">農曆 → 公曆</option>
+            </select>
+          </label>
+          <span id="lu-solar-fields">
+            <label>公曆日期：<input type="date" id="lu-date"></label>
+          </span>
+          <span id="lu-lunar-fields" hidden>
+            <label>年<input type="number" id="lu-ly" value="2024" style="width:80px"></label>
+            <label>月<input type="number" id="lu-lm" value="1" min="1" max="12" style="width:60px"></label>
+            <label>日<input type="number" id="lu-ld" value="1" min="1" max="30" style="width:60px"></label>
+            <label><input type="checkbox" id="lu-leap"> 閏月</label>
+          </span>
+          <button class="btn btn-primary" id="lu-run">換算</button>
+        </div>
+        <div id="lu-status" class="status-line"></div>
+        <div id="lu-output" class="info-cards"></div>
+      </section>
+
+      <section id="panel-cangjie" class="tool-panel" hidden>
+        <h2>倉頡／速成查詢</h2>
+        <p class="tool-desc">輸入中文字，顯示每個字的倉頡碼組合（及速成碼）。</p>
+        <textarea id="cj-input" class="tool-input" rows="3" placeholder="輸入中文字，例如：倉頡輸入法"></textarea>
+        <div class="control-row"><button class="btn btn-primary" id="cj-run">查詢</button><button class="btn" id="cj-copy">複製全部倉頡碼</button></div>
+        <div id="cj-status" class="status-line"></div>
+        <div id="cj-output" class="cj-cards"></div>
+      </section>
+
+      <section id="panel-base64" class="tool-panel" hidden>
+        <h2>Base64 編碼／解碼</h2>
+        <p class="tool-desc">支援中文（UTF-8）的 Base64 編碼與解碼。</p>
+        <textarea id="b64-input" class="tool-input" rows="6" placeholder="輸入文字或 Base64…"></textarea>
+        <div class="control-row">
+          <label><input type="checkbox" id="b64-urlsafe"> URL-safe 變體</label>
+          <button class="btn btn-primary" id="b64-enc">編碼</button>
+          <button class="btn btn-primary" id="b64-dec">解碼</button>
+        </div>
+        <div id="b64-status" class="status-line"></div>
+        <div class="output-wrap"><button class="copy-btn" data-copy="b64-output">複製</button><textarea id="b64-output" class="tool-output" rows="6" readonly></textarea></div>
+      </section>
+
+      <section id="panel-urlencode" class="tool-panel" hidden>
+        <h2>URL 編碼／解碼</h2>
+        <p class="tool-desc">URL 百分比編碼與解碼。</p>
+        <textarea id="ue-input" class="tool-input" rows="6" placeholder="輸入文字或已編碼 URL…"></textarea>
+        <div class="control-row">
+          <label>範圍：<select id="ue-mode"><option value="component">Component（編碼 &amp;?=#）</option><option value="uri">完整 URI（保留 &amp;?=#）</option></select></label>
+          <button class="btn btn-primary" id="ue-enc">編碼</button>
+          <button class="btn btn-primary" id="ue-dec">解碼</button>
+        </div>
+        <div id="ue-status" class="status-line"></div>
+        <div class="output-wrap"><button class="copy-btn" data-copy="ue-output">複製</button><textarea id="ue-output" class="tool-output" rows="6" readonly></textarea></div>
+      </section>
+
+      <section id="panel-mojibake" class="tool-panel" hidden>
+        <h2>亂碼修復</h2>
+        <p class="tool-desc">嘗試修復因編碼錯誤（Big5／GB／UTF-8）造成的中文亂碼。將文字按某編碼還原成位元組，再用正確編碼重新解讀。</p>
+        <textarea id="mj-input" class="tool-input" rows="6" placeholder="貼上亂碼文字…"></textarea>
+        <div class="control-row">
+          <label>原始位元組來自：<select id="mj-from"><option value="utf-8">UTF-8</option><option value="latin1">Latin-1</option><option value="big5">Big5</option><option value="gb18030">GB18030</option></select></label>
+          <label>重新解讀為：<select id="mj-to"><option value="big5">Big5</option><option value="gb18030">GB18030</option><option value="utf-8">UTF-8</option></select></label>
+          <button class="btn btn-primary" id="mj-run">修復</button>
+          <button class="btn" id="mj-auto">自動嘗試</button>
+        </div>
+        <div id="mj-status" class="status-line"></div>
+        <div class="output-wrap"><button class="copy-btn" data-copy="mj-output">複製</button><textarea id="mj-output" class="tool-output" rows="6" readonly></textarea></div>
+      </section>
+
+      <section id="panel-unicode" class="tool-panel" hidden>
+        <h2>Unicode 字符查詢</h2>
+        <p class="tool-desc">逐字顯示 Unicode 碼位、UTF-8 位元組、HTML 實體等資訊。</p>
+        <textarea id="uni-input" class="tool-input" rows="3" placeholder="輸入字符，例如：中A😀"></textarea>
+        <div class="control-row"><button class="btn btn-primary" id="uni-run">查詢</button></div>
+        <div class="table-wrapper"><table id="uni-output" class="data-table"></table></div>
+      </section>
+
+      <section id="panel-charfreq" class="tool-panel" hidden>
+        <h2>字頻分析</h2>
+        <p class="tool-desc">統計文字中字元出現頻率，由高至低排序。</p>
+        <textarea id="cf-input" class="tool-input" rows="8" placeholder="貼上文字…"></textarea>
+        <div class="control-row">
+          <label>對象：<select id="cf-mode"><option value="cjk">中文字</option><option value="all">所有非空白字元</option></select></label>
+          <button class="btn btn-primary" id="cf-run">分析</button>
+        </div>
+        <div id="cf-status" class="status-line"></div>
+        <div class="table-wrapper"><table id="cf-output" class="data-table"></table></div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- UMD libraries (define globals) -->
+  <script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pinyin-pro/dist/index.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.5.3/papaparse.min.js"></script>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
