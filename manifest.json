@@ -1,0 +1,19 @@
+{
+  "name": "中文工具箱 · Chinese Text Toolbox",
+  "short_name": "中文工具箱",
+  "description": "純前端中文文字處理工具箱：字數統計、繁簡轉換、拼音粵拼、農曆、倉頡、單位換算等，全部本地運行。",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f1f5f9",
+  "theme_color": "#3b82f6",
+  "lang": "zh-Hant",
+  "dir": "ltr",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

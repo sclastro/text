@@ -1,6 +1,6 @@
-# 🀄 中文工具箱 · Chinese Text Toolbox
+# 中文工具箱 · Chinese Text Toolbox
 
-純前端中文文字處理工具箱，全部功能喺瀏覽器本地運行，**無需後端或 API Key**。
+純前端中文文字處理工具箱，全部功能喺瀏覽器本地運行，**無需後端或 API Key**。支援安裝做 PWA（可加到手機主畫面）。
 
 ## 功能（21 個工具）
 
@@ -44,6 +44,15 @@ python3 -m http.server 8000
 
 或部署到任何靜態網站主機（GitHub Pages、Netlify、Cloudflare Pages 等）。
 
+### 安裝做 App（PWA）
+
+用手機或電腦瀏覽器開啟網站後：
+- **iOS Safari**：分享 → 加入主畫面
+- **Android Chrome**：選單 → 安裝應用程式（或會自動彈出安裝提示）
+- **桌面 Chrome／Edge**：網址列右側嘅安裝圖示
+
+安裝後會有獨立 App 圖示、全螢幕運行，並支援離線開啟（app shell 由 Service Worker 快取，第三方 CDN library 首次連線後都會快取）。
+
 ## 技術
 
 - 純 HTML / CSS / JavaScript（ES modules），無建置步驟
@@ -56,7 +65,10 @@ python3 -m http.server 8000
 ```
 index.html        — 介面骨架、側邊欄、CDN script
 css/style.css     — 樣式、深色／淺色主題、響應式
-js/main.js        — 導覽、主題切換、工具懶載入
+js/main.js        — 導覽、主題切換、工具懶載入、Service Worker 註冊
 js/tools/*.js     — 每個工具一個模組
 data/cangjie.js   — 倉頡碼資料
+manifest.json     — PWA 設定（名稱、圖示、主題色）
+sw.js             — Service Worker（快取 app shell，支援離線）
+icons/            — App 圖示（16／32／180／192／512，含 maskable 版本）
 ```

@@ -107,3 +107,10 @@ const hash = location.hash.slice(1);
 if (hash && document.querySelector(`.nav-item[data-tool="${hash}"]`)) {
   showTool(hash);
 }
+
+// PWA: register service worker for offline app-shell caching
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(err => console.error('SW 註冊失敗：', err));
+  });
+}
