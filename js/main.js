@@ -94,7 +94,8 @@ document.addEventListener('click', e => {
 
 /* ---------- 檔案下載 / 匯入 ---------- */
 
-function saveFile(text, filename, mime = 'text/plain;charset=utf-8') {
+// Plain anchor download — used when the browser has no native save dialog.
+function anchorDownload(text, filename, mime) {
   const blob = new Blob([text], { type: mime });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -104,6 +105,76 @@ function saveFile(text, filename, mime = 'text/plain;charset=utf-8') {
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+// Native OS "Save as" dialog (File System Access API) — lets the user choose
+// folder, filename and extension. Chrome/Edge/Android; not Safari/Firefox.
+// Must run inside the click gesture with no prior await, or the browser
+// rejects it for losing transient user activation.
+async function saveViaNativeDialog(text, suggestedName, mime) {
+  const ext = (suggestedName.match(/\.[^.]+$/) || [''])[0];
+  const baseMime = mime.split(';')[0];
+  const handle = await window.showSaveFilePicker({
+    suggestedName,
+    // "All Files" stays available (excludeAcceptAllOption defaults to false),
+    // so the user can type any extension they want.
+    types: ext ? [{ description: '檔案', accept: { [baseMime]: [ext] } }] : [],
+  });
+  const writable = await handle.createWritable();
+  await writable.write(new Blob([text], { type: mime }));
+  await writable.close();
+  return handle.name;
+}
+
+// In-app fallback dialog: filename + extension are editable; the browser
+// decides the folder (users with "always ask where to save" also get its dialog).
+function askFilename(suggested) {
+  return new Promise(resolve => {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="save-title">
+        <h3 id="save-title">儲存檔案</h3>
+        <label class="modal-label" for="save-name">檔案名稱（可修改副檔名）</label>
+        <input id="save-name" class="modal-input" type="text" spellcheck="false">
+        <p class="modal-note">此瀏覽器不支援選擇儲存位置，檔案會存到預設下載資料夾。</p>
+        <div class="modal-actions">
+          <button class="btn" data-act="cancel">取消</button>
+          <button class="btn btn-primary" data-act="save">儲存</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+
+    const input = overlay.querySelector('#save-name');
+    input.value = suggested;
+
+    const close = value => {
+      overlay.remove();
+      document.removeEventListener('keydown', onKey);
+      resolve(value);
+    };
+    const submit = () => {
+      const v = input.value.trim();
+      close(v || null);
+    };
+    const onKey = ev => {
+      if (ev.key === 'Escape') close(null);
+      else if (ev.key === 'Enter' && document.activeElement === input) submit();
+    };
+
+    overlay.addEventListener('click', ev => {
+      if (ev.target === overlay) close(null);
+      const act = ev.target.closest('[data-act]')?.dataset.act;
+      if (act === 'cancel') close(null);
+      if (act === 'save') submit();
+    });
+    document.addEventListener('keydown', onKey);
+
+    input.focus();
+    // preselect just the base name so the extension is easy to keep or retype
+    const dot = suggested.lastIndexOf('.');
+    input.setSelectionRange(0, dot > 0 ? dot : suggested.length);
+  });
 }
 
 function isJsonText(t) {
@@ -153,15 +224,17 @@ document.addEventListener('click', e => {
   const target = document.getElementById(btn.dataset.download);
   if (!target) return;
 
+  const flash = msg => {
+    const orig = btn.dataset.label || btn.textContent;
+    btn.dataset.label = orig;
+    btn.textContent = msg;
+    setTimeout(() => { btn.textContent = btn.dataset.label; }, 1400);
+  };
+
   const kind = btn.dataset.kind || 'text';
   let { text, mime } = extractForDownload(target, kind);
 
-  if (!text.trim()) {
-    const orig = btn.textContent;
-    btn.textContent = '冇內容';
-    setTimeout(() => { btn.textContent = orig; }, 1200);
-    return;
-  }
+  if (!text.trim()) { flash('冇內容'); return; }
 
   let filename = btn.dataset.filename || 'output.txt';
   // When the output format varies (e.g. Base64 decode), name it .json if it really is JSON.
@@ -170,10 +243,28 @@ document.addEventListener('click', e => {
     mime = 'application/json;charset=utf-8';
   }
 
-  saveFile(text, filename, mime);
-  const orig = btn.textContent;
-  btn.textContent = '已下載 ✓';
-  setTimeout(() => { btn.textContent = orig; }, 1200);
+  // Native save dialog if available. Called synchronously here (no await
+  // beforehand) so the click's user activation is still valid.
+  if (typeof window.showSaveFilePicker === 'function') {
+    saveViaNativeDialog(text, filename, mime)
+      .then(name => flash('已儲存 ✓'))
+      .catch(err => {
+        if (err && err.name === 'AbortError') return; // user cancelled
+        console.warn('原生儲存對話框失敗，改用備用方式：', err);
+        askFilename(filename).then(name => {
+          if (!name) return;
+          anchorDownload(text, name, mime);
+          flash('已下載 ✓');
+        });
+      });
+    return;
+  }
+
+  askFilename(filename).then(name => {
+    if (!name) return;
+    anchorDownload(text, name, mime);
+    flash('已下載 ✓');
+  });
 });
 
 // One reusable hidden file input for all "載入檔案" buttons

@@ -145,6 +145,30 @@ select, input[type="number"], input[type="url"], input[type="date"], input[type=
 /* leave room so long output lines don't run under the buttons */
 .output-wrap .tool-output { padding-top: 2.4rem; }
 
+/* Save-as dialog (fallback for browsers without File System Access API) */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(15, 23, 42, .55);
+  display: flex; align-items: center; justify-content: center;
+  padding: 1rem;
+}
+.modal-card {
+  background: var(--bg-card); color: var(--text);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 1.25rem 1.4rem; width: 100%; max-width: 420px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .3);
+}
+.modal-card h3 { margin: 0 0 .9rem; font-size: 1.1rem; }
+.modal-label { display: block; font-size: .85rem; color: var(--text-muted); margin-bottom: .35rem; }
+.modal-input {
+  width: 100%; padding: .6rem .7rem; font-family: var(--mono); font-size: .95rem;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--bg); color: var(--text);
+}
+.modal-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,130,246,.2); }
+.modal-note { font-size: .78rem; color: var(--text-muted); margin: .6rem 0 0; }
+.modal-actions { display: flex; justify-content: flex-end; gap: .5rem; margin-top: 1.1rem; }
+
 /* drag & drop a text file onto any input */
 textarea.tool-input.drag-over {
   border-color: var(--accent);
