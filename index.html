@@ -96,7 +96,7 @@
           <button class="btn btn-primary" id="fw-to-half">全形 → 半形</button>
           <button class="btn btn-primary" id="fw-to-full">半形 → 全形</button>
         </div>
-        <div class="output-wrap"><button class="copy-btn" data-copy="fw-output">複製</button><textarea id="fw-output" class="tool-output" rows="8" readonly></textarea></div>
+        <div class="output-wrap"><div class="out-actions"><button class="act-btn dl-btn" data-download="fw-output" data-filename="fullwidth.txt" data-smart="0">下載</button><button class="act-btn copy-btn" data-copy="fw-output">複製</button></div><textarea id="fw-output" class="tool-output" rows="8" readonly></textarea></div>
       </section>
 
       <section id="panel-punctuation" class="tool-panel" hidden>
@@ -110,7 +110,7 @@
           <label><input type="checkbox" id="pu-space" checked> 清除中文標點前後多餘空白</label>
         </div>
         <div class="control-row"><button class="btn btn-primary" id="pu-run">格式化</button></div>
-        <div class="output-wrap"><button class="copy-btn" data-copy="pu-output">複製</button><textarea id="pu-output" class="tool-output" rows="8" readonly></textarea></div>
+        <div class="output-wrap"><div class="out-actions"><button class="act-btn dl-btn" data-download="pu-output" data-filename="punctuation.txt" data-smart="0">下載</button><button class="act-btn copy-btn" data-copy="pu-output">複製</button></div><textarea id="pu-output" class="tool-output" rows="8" readonly></textarea></div>
       </section>
 
       <section id="panel-whitespace" class="tool-panel" hidden>
@@ -126,7 +126,7 @@
           <label><input type="checkbox" id="ws-crlf" checked> 統一換行為 LF</label>
         </div>
         <div class="control-row"><button class="btn btn-primary" id="ws-run">清除</button></div>
-        <div class="output-wrap"><button class="copy-btn" data-copy="ws-output">複製</button><textarea id="ws-output" class="tool-output" rows="8" readonly></textarea></div>
+        <div class="output-wrap"><div class="out-actions"><button class="act-btn dl-btn" data-download="ws-output" data-filename="whitespace.txt" data-smart="0">下載</button><button class="act-btn copy-btn" data-copy="ws-output">複製</button></div><textarea id="ws-output" class="tool-output" rows="8" readonly></textarea></div>
       </section>
 
       <section id="panel-romanize" class="tool-panel" hidden>
@@ -157,6 +157,7 @@
           <button class="btn btn-primary" id="ro-run">轉換</button>
         </div>
         <div id="ro-status" class="status-line"></div>
+        <div class="control-row"><button class="btn dl-btn" data-download="ro-output" data-filename="romanization.txt" data-kind="node">下載</button><button class="btn copy-btn" data-copy="ro-output">複製</button></div>
         <div id="ro-output" class="tool-output rich-output"></div>
       </section>
 
@@ -178,14 +179,14 @@
           <button class="btn btn-primary" id="cv-run">轉換</button>
         </div>
         <div id="cv-status" class="status-line"></div>
-        <div class="output-wrap"><button class="copy-btn" data-copy="cv-output">複製</button><textarea id="cv-output" class="tool-output" rows="8" readonly></textarea></div>
+        <div class="output-wrap"><div class="out-actions"><button class="act-btn dl-btn" data-download="cv-output" data-filename="converted.txt" data-smart="0">下載</button><button class="act-btn copy-btn" data-copy="cv-output">複製</button></div><textarea id="cv-output" class="tool-output" rows="8" readonly></textarea></div>
       </section>
 
       <section id="panel-markdown" class="tool-panel" hidden>
         <h2>Markdown 預覽</h2>
         <p class="tool-desc">即時預覽 Markdown，並可匯出 PDF 或複製 HTML。</p>
         <div class="control-row">
-          <button class="btn" id="md-copy-html">複製 HTML</button>
+          <button class="btn" id="md-copy-html">複製 HTML</button><button class="btn dl-btn" data-download="md-input" data-filename="document.md" data-kind="value">下載</button><button class="btn dl-btn" data-download="md-preview" data-filename="document.html" data-kind="html">下載</button>
           <button class="btn btn-primary" id="md-pdf">匯出 PDF</button>
         </div>
         <div class="split-pane">
@@ -205,6 +206,7 @@
           <button class="btn" id="csv-md">複製為 Markdown 表格</button>
         </div>
         <div id="csv-status" class="status-line"></div>
+        <div class="control-row"><button class="btn dl-btn" data-download="csv-output" data-filename="table.csv" data-kind="table">下載</button></div>
         <div class="table-wrapper" id="csv-output"></div>
       </section>
 
@@ -225,7 +227,7 @@
           <button class="btn" id="json-validate">驗證</button>
         </div>
         <div id="json-status" class="status-line"></div>
-        <div class="output-wrap"><button class="copy-btn" data-copy="json-output">複製</button><textarea id="json-output" class="tool-output" rows="10" readonly></textarea></div>
+        <div class="output-wrap"><div class="out-actions"><button class="act-btn dl-btn" data-download="json-output" data-filename="data.json" data-smart="0">下載</button><button class="act-btn copy-btn" data-copy="json-output">複製</button></div><textarea id="json-output" class="tool-output" rows="10" readonly></textarea></div>
       </section>
 
       <section id="panel-chinesenum" class="tool-panel" hidden>
@@ -243,7 +245,7 @@
           <button class="btn btn-primary" id="cn-run">轉換</button>
         </div>
         <div id="cn-status" class="status-line"></div>
-        <div class="output-wrap"><button class="copy-btn" data-copy="cn-output">複製</button><textarea id="cn-output" class="tool-output" rows="3" readonly></textarea></div>
+        <div class="output-wrap"><div class="out-actions"><button class="act-btn dl-btn" data-download="cn-output" data-filename="chinese-number.txt" data-smart="0">下載</button><button class="act-btn copy-btn" data-copy="cn-output">複製</button></div><textarea id="cn-output" class="tool-output" rows="3" readonly></textarea></div>
       </section>
 
       <section id="panel-qrcode" class="tool-panel" hidden>
@@ -271,6 +273,7 @@
           <button class="btn" id="tz-now">現在</button>
           <button class="btn btn-primary" id="tz-run">換算</button>
         </div>
+        <div class="control-row"><button class="btn dl-btn" data-download="tz-output" data-filename="timezones.csv" data-kind="table">下載</button></div>
         <div class="table-wrapper"><table id="tz-output" class="data-table"></table></div>
       </section>
 
@@ -282,6 +285,7 @@
           <input type="number" id="unit-value" class="tool-input" value="1" style="max-width:160px">
           <label>由 <select id="unit-from"></select></label>
         </div>
+        <div class="control-row"><button class="btn dl-btn" data-download="unit-output" data-filename="units.csv" data-kind="table">下載</button></div>
         <div class="table-wrapper"><table id="unit-output" class="data-table"></table></div>
       </section>
 
@@ -297,7 +301,7 @@
           <button class="btn btn-primary" id="us-run">還原</button>
         </div>
         <div id="us-status" class="status-line"></div>
-        <div class="output-wrap"><button class="copy-btn" data-copy="us-output">複製</button><textarea id="us-output" class="tool-output" rows="3" readonly></textarea></div>
+        <div class="output-wrap"><div class="out-actions"><button class="act-btn dl-btn" data-download="us-output" data-filename="url.txt" data-smart="0">下載</button><button class="act-btn copy-btn" data-copy="us-output">複製</button></div><textarea id="us-output" class="tool-output" rows="3" readonly></textarea></div>
       </section>
 
       <section id="panel-lunar" class="tool-panel" hidden>
@@ -329,7 +333,7 @@
         <h2>倉頡／速成查詢</h2>
         <p class="tool-desc">輸入中文字，顯示每個字的倉頡碼組合（及速成碼）。</p>
         <textarea id="cj-input" class="tool-input" rows="3" placeholder="輸入中文字，例如：倉頡輸入法"></textarea>
-        <div class="control-row"><button class="btn btn-primary" id="cj-run">查詢</button><button class="btn" id="cj-copy">複製全部倉頡碼</button></div>
+        <div class="control-row"><button class="btn btn-primary" id="cj-run">查詢</button><button class="btn" id="cj-copy">複製全部倉頡碼</button><button class="btn dl-btn" data-download="cj-output" data-filename="cangjie-codes.txt" data-kind="cangjie">下載</button></div>
         <div id="cj-status" class="status-line"></div>
         <div id="cj-output" class="cj-cards"></div>
       </section>
@@ -344,7 +348,7 @@
           <button class="btn btn-primary" id="b64-dec">解碼</button>
         </div>
         <div id="b64-status" class="status-line"></div>
-        <div class="output-wrap"><button class="copy-btn" data-copy="b64-output">複製</button><textarea id="b64-output" class="tool-output" rows="6" readonly></textarea></div>
+        <div class="output-wrap"><div class="out-actions"><button class="act-btn dl-btn" data-download="b64-output" data-filename="base64-output.txt" data-smart="1">下載</button><button class="act-btn copy-btn" data-copy="b64-output">複製</button></div><textarea id="b64-output" class="tool-output" rows="6" readonly></textarea></div>
       </section>
 
       <section id="panel-urlencode" class="tool-panel" hidden>
@@ -357,7 +361,7 @@
           <button class="btn btn-primary" id="ue-dec">解碼</button>
         </div>
         <div id="ue-status" class="status-line"></div>
-        <div class="output-wrap"><button class="copy-btn" data-copy="ue-output">複製</button><textarea id="ue-output" class="tool-output" rows="6" readonly></textarea></div>
+        <div class="output-wrap"><div class="out-actions"><button class="act-btn dl-btn" data-download="ue-output" data-filename="url-encoded.txt" data-smart="1">下載</button><button class="act-btn copy-btn" data-copy="ue-output">複製</button></div><textarea id="ue-output" class="tool-output" rows="6" readonly></textarea></div>
       </section>
 
       <section id="panel-mojibake" class="tool-panel" hidden>
@@ -371,7 +375,7 @@
           <button class="btn" id="mj-auto">自動嘗試</button>
         </div>
         <div id="mj-status" class="status-line"></div>
-        <div class="output-wrap"><button class="copy-btn" data-copy="mj-output">複製</button><textarea id="mj-output" class="tool-output" rows="6" readonly></textarea></div>
+        <div class="output-wrap"><div class="out-actions"><button class="act-btn dl-btn" data-download="mj-output" data-filename="fixed-text.txt" data-smart="1">下載</button><button class="act-btn copy-btn" data-copy="mj-output">複製</button></div><textarea id="mj-output" class="tool-output" rows="6" readonly></textarea></div>
       </section>
 
       <section id="panel-unicode" class="tool-panel" hidden>
@@ -379,6 +383,7 @@
         <p class="tool-desc">逐字顯示 Unicode 碼位、UTF-8 位元組、HTML 實體等資訊。</p>
         <textarea id="uni-input" class="tool-input" rows="3" placeholder="輸入字符，例如：中A😀"></textarea>
         <div class="control-row"><button class="btn btn-primary" id="uni-run">查詢</button></div>
+        <div class="control-row"><button class="btn dl-btn" data-download="uni-output" data-filename="unicode.csv" data-kind="table">下載</button></div>
         <div class="table-wrapper"><table id="uni-output" class="data-table"></table></div>
       </section>
 
@@ -391,6 +396,7 @@
           <button class="btn btn-primary" id="cf-run">分析</button>
         </div>
         <div id="cf-status" class="status-line"></div>
+        <div class="control-row"><button class="btn dl-btn" data-download="cf-output" data-filename="char-frequency.csv" data-kind="table">下載</button></div>
         <div class="table-wrapper"><table id="cf-output" class="data-table"></table></div>
       </section>
 

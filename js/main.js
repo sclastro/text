@@ -92,6 +92,146 @@ document.addEventListener('click', e => {
   });
 });
 
+/* ---------- 檔案下載 / 匯入 ---------- */
+
+function saveFile(text, filename, mime = 'text/plain;charset=utf-8') {
+  const blob = new Blob([text], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function isJsonText(t) {
+  const s = (t || '').trim();
+  if (!s || !/^[{[]/.test(s)) return false;
+  try { JSON.parse(s); return true; } catch { return false; }
+}
+
+// Serialize a rendered <table> (or a wrapper containing one) to CSV.
+// BOM prefix so Excel on Windows/HK opens UTF-8 Chinese correctly.
+function tableToCsv(el) {
+  const table = el.tagName === 'TABLE' ? el : el.querySelector('table');
+  if (!table) return '';
+  const esc = s => (/[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s);
+  const rows = [...table.rows].map(r =>
+    [...r.cells].map(c => esc(c.textContent.trim())).join(',')
+  );
+  return '﻿' + rows.join('\r\n');
+}
+
+// Cangjie panel renders cards, not text — rebuild a readable code list.
+function cangjieToText(el) {
+  return [...el.querySelectorAll('.cj-card')].map(card => {
+    const ch = card.querySelector('.cj-char')?.textContent || '';
+    const code = card.querySelector('.cj-code')?.textContent || '';
+    const quick = card.querySelector('.cj-quick')?.textContent || '';
+    return code ? `${ch}\t${code}\t${quick}` : `${ch}\t(查無此字)`;
+  }).join('\n');
+}
+
+function extractForDownload(el, kind) {
+  switch (kind) {
+    case 'table':   return { text: tableToCsv(el), mime: 'text/csv;charset=utf-8' };
+    case 'cangjie': return { text: cangjieToText(el), mime: 'text/plain;charset=utf-8' };
+    case 'html':    return { text: el.innerHTML, mime: 'text/html;charset=utf-8' };
+    case 'value':   return { text: el.value ?? '', mime: 'text/plain;charset=utf-8' };
+    case 'node':    return { text: el.innerText ?? el.textContent ?? '', mime: 'text/plain;charset=utf-8' };
+    default:        return { text: el.value !== undefined ? el.value : (el.innerText ?? el.textContent ?? ''),
+                             mime: 'text/plain;charset=utf-8' };
+  }
+}
+
+// Download buttons (event delegation)
+document.addEventListener('click', e => {
+  const btn = e.target.closest('.dl-btn');
+  if (!btn) return;
+  const target = document.getElementById(btn.dataset.download);
+  if (!target) return;
+
+  const kind = btn.dataset.kind || 'text';
+  let { text, mime } = extractForDownload(target, kind);
+
+  if (!text.trim()) {
+    const orig = btn.textContent;
+    btn.textContent = '冇內容';
+    setTimeout(() => { btn.textContent = orig; }, 1200);
+    return;
+  }
+
+  let filename = btn.dataset.filename || 'output.txt';
+  // When the output format varies (e.g. Base64 decode), name it .json if it really is JSON.
+  if (btn.dataset.smart === '1' && isJsonText(text)) {
+    filename = filename.replace(/\.[^.]+$/, '') + '.json';
+    mime = 'application/json;charset=utf-8';
+  }
+
+  saveFile(text, filename, mime);
+  const orig = btn.textContent;
+  btn.textContent = '已下載 ✓';
+  setTimeout(() => { btn.textContent = orig; }, 1200);
+});
+
+// One reusable hidden file input for all "載入檔案" buttons
+const filePicker = document.createElement('input');
+filePicker.type = 'file';
+filePicker.accept = '.txt,.json,.csv,.tsv,.md,.xml,.html,.log,.srt,text/*,application/json';
+filePicker.hidden = true;
+document.body.appendChild(filePicker);
+let pickerTarget = null;
+
+function loadFileInto(file, textarea) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    textarea.value = reader.result;
+    // let live tools (字數統計, Markdown 預覽) recompute
+    textarea.dispatchEvent(new Event('input', { bubbles: true }));
+  };
+  reader.readAsText(file, 'utf-8');
+}
+
+filePicker.addEventListener('change', () => {
+  const file = filePicker.files[0];
+  if (file && pickerTarget) loadFileInto(file, pickerTarget);
+  filePicker.value = '';
+});
+
+// Inject a 載入檔案 button + drag & drop for every tool input
+document.querySelectorAll('.tool-panel').forEach(panel => {
+  const input = panel.querySelector('textarea.tool-input');
+  if (!input) return;
+
+  const btn = document.createElement('button');
+  btn.className = 'btn load-btn';
+  btn.textContent = '📂 載入檔案';
+  btn.title = '由檔案讀入文字（亦可將檔案拖入輸入框）';
+  btn.addEventListener('click', () => { pickerTarget = input; filePicker.click(); });
+
+  const row = panel.querySelector('.control-row');
+  if (row) row.appendChild(btn);
+  else {
+    const wrap = document.createElement('div');
+    wrap.className = 'control-row';
+    wrap.appendChild(btn);
+    input.insertAdjacentElement('afterend', wrap);
+  }
+});
+
+document.querySelectorAll('textarea.tool-input').forEach(ta => {
+  ta.addEventListener('dragover', e => { e.preventDefault(); ta.classList.add('drag-over'); });
+  ta.addEventListener('dragleave', () => ta.classList.remove('drag-over'));
+  ta.addEventListener('drop', e => {
+    e.preventDefault();
+    ta.classList.remove('drag-over');
+    const file = e.dataTransfer?.files?.[0];
+    if (file) loadFileInto(file, ta);
+  });
+});
+
 // Home tiles
 const homeGrid = document.getElementById('home-grid');
 TOOLS.forEach(t => {

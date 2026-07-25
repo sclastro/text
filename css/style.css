@@ -130,14 +130,27 @@ select, input[type="number"], input[type="url"], input[type="date"], input[type=
 .btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
 .btn-danger { background: var(--danger); color: #fff; border-color: var(--danger); }
 
-/* Output wrap with copy button */
+/* Output wrap with copy / download buttons */
 .output-wrap { position: relative; margin-top: 1rem; }
-.copy-btn {
+.out-actions {
   position: absolute; top: .5rem; right: .5rem; z-index: 1;
-  padding: .25rem .6rem; font-size: .78rem; border: 1px solid var(--border);
-  border-radius: var(--radius); background: var(--bg-card); color: var(--text-muted); cursor: pointer;
+  display: flex; gap: .35rem;
 }
-.copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+.act-btn {
+  padding: .25rem .6rem; font-size: .78rem; border: 1px solid var(--border);
+  border-radius: var(--radius); background: var(--bg-card); color: var(--text-muted);
+  cursor: pointer; font-family: var(--font); white-space: nowrap;
+}
+.act-btn:hover { color: var(--accent); border-color: var(--accent); }
+/* leave room so long output lines don't run under the buttons */
+.output-wrap .tool-output { padding-top: 2.4rem; }
+
+/* drag & drop a text file onto any input */
+textarea.tool-input.drag-over {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59,130,246,.25);
+  background: rgba(59,130,246,.04);
+}
 .rich-output { min-height: 80px; margin-top: 1rem; padding: 1rem; line-height: 2.4; }
 
 /* Stats grid */
