@@ -15,9 +15,17 @@
   - Base64／URL／亂碼修復解碼結果 → 若內容係有效 JSON 會**自動存成 `.json`**，否則 `.txt`
   - 表格類（時區、單位、Unicode、字頻、CSV）→ `.csv`（帶 BOM，Excel 開中文唔會亂碼）
   - Markdown → `.md` 原稿、`.html` 或 PDF
+
   - 倉頡查詢 → `.txt` 碼表；QR Code → `.png`
 
-## 功能（21 個工具）
+### PDF 匯出點解用瀏覽器列印
+
+PDF 匯出（Markdown 同電子書）一律經瀏覽器嘅列印引擎，而唔用 html2canvas 影相：
+影相出嚟嘅 PDF 冇文字層（揀唔到、搜尋唔到）、檔案大幾倍，而且 canvas 有面積上限
+（約 268 MP）—— 實測大約 3–5 萬字之後 `toDataURL` 就會靜靜雞失敗，匯出空白檔而唔報錯。
+列印引擎用系統中文字型，輸出係真文字，10 萬字嘅書都冇問題。
+
+## 功能（23 個工具）
 
 ### 文字處理
 - **字數統計** — 字元、中文字、英文詞、段落、預估閱讀時間
@@ -40,6 +48,10 @@
 - **時區轉換** — 多時區對照，顯示星期
 - **單位換算** — 長度／重量／溫度／面積，含港式單位（斤、両、呎）
 - **短網址還原** — 還原短網址（受瀏覽器 CORS 限制）
+
+### 檔案工具
+- **檔案格式偵測** — 讀檔頭簽章（magic number）辨認真實格式，唔靠副檔名；會揪出副檔名同實際格式唔一致嘅檔案
+- **電子書轉 PDF** — MOBI／AZW3／EPUB／FB2／CBZ，本機解析，輸出真文字 PDF（可揀、可搜尋）
 
 ### 中文特色
 - **農曆／公曆換算** — 互相換算，顯示星期、生肖、干支、節氣
@@ -72,7 +84,7 @@ python3 -m http.server 8000
 
 - 純 HTML / CSS / JavaScript（ES modules），無建置步驟
 - 第三方 library 由 CDN 載入（jsDelivr / cdnjs），首次載入後瀏覽器會快取：
-  OpenCC-JS、pinyin-pro、to-jyutping、Marked、DOMPurify、html2pdf.js、qrcodejs、lunar-javascript、PapaParse
+  OpenCC-JS、pinyin-pro、to-jyutping、Marked、DOMPurify、qrcodejs、lunar-javascript、PapaParse、foliate-js（電子書解析）
 - 倉頡資料內建於 `data/cangjie.js`（來源：[ikwbb/cangjie-practice-tool](https://github.com/ikwbb/cangjie-practice-tool)）
 
 ## 檔案結構

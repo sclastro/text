@@ -1,5 +1,5 @@
 // 中文工具箱 — service worker: cache app shell for offline use
-const VERSION = 'v3';
+const VERSION = 'v4';
 const CACHE = `cjk-toolbox-${VERSION}`;
 
 const PRECACHE = [
@@ -14,6 +14,8 @@ const PRECACHE = [
   'icons/apple-touch-icon.png',
   'js/tools/base64.js',
   'js/tools/cangjie.js',
+  'js/tools/filetype.js',
+  'js/tools/ebook.js',
   'js/tools/charfreq.js',
   'js/tools/chinesenum.js',
   'js/tools/converter.js',

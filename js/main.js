@@ -16,6 +16,8 @@ const TOOLS = [
   { id: 'unshorten', name: '短網址還原', cat: '實用工具' },
   { id: 'lunar', name: '農曆／公曆', cat: '中文特色' },
   { id: 'cangjie', name: '倉頡／速成', cat: '中文特色' },
+  { id: 'filetype', name: '檔案格式偵測', cat: '檔案工具' },
+  { id: 'ebook', name: '電子書轉 PDF', cat: '檔案工具' },
   { id: 'base64', name: 'Base64 編碼', cat: '額外工具' },
   { id: 'urlencode', name: 'URL 編碼', cat: '額外工具' },
   { id: 'mojibake', name: '亂碼修復', cat: '額外工具' },

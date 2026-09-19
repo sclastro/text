@@ -52,6 +52,10 @@
         <li class="nav-item" data-tool="lunar">農曆／公曆</li>
         <li class="nav-item" data-tool="cangjie">倉頡／速成</li>
 
+        <li class="nav-category">檔案工具</li>
+        <li class="nav-item" data-tool="filetype">檔案格式偵測</li>
+        <li class="nav-item" data-tool="ebook">電子書轉 PDF</li>
+
         <li class="nav-category">額外工具</li>
         <li class="nav-item" data-tool="base64">Base64 編碼</li>
         <li class="nav-item" data-tool="urlencode">URL 編碼</li>
@@ -338,6 +342,38 @@
         <div id="cj-output" class="cj-cards"></div>
       </section>
 
+      <section id="panel-filetype" class="tool-panel" hidden>
+        <h2>檔案格式偵測</h2>
+        <p class="tool-desc">唔記得個檔係咩格式？拖檔案入嚟，讀取檔頭簽章（magic number）辨認真實格式，唔靠副檔名。完全喺本機分析，檔案唔會上傳。</p>
+        <div id="ft-drop" class="dropzone">
+          <div class="dz-icon">📄</div>
+          <div class="dz-main">拖檔案入嚟，或者㩒一下揀檔案</div>
+          <div class="dz-sub">可以一次揀多個檔案</div>
+        </div>
+        <input type="file" id="ft-input" multiple hidden>
+        <div id="ft-status" class="status-line"></div>
+        <div class="table-wrapper"><table id="ft-output" class="data-table"></table></div>
+      </section>
+
+      <section id="panel-ebook" class="tool-panel" hidden>
+        <h2>電子書轉 PDF</h2>
+        <p class="tool-desc">支援 MOBI、AZW3、EPUB、FB2、CBZ。喺你部機本地解析，檔案唔會上傳。輸出用瀏覽器列印引擎，PDF 入面係真文字（可揀、可搜尋），中文正常。</p>
+        <div class="alert alert-warn">⚠️ 有 DRM 保護嘅檔案（例如喺 Amazon 買嘅 Kindle 書）無法開啟 —— 呢個係加密限制，任何工具都做唔到。</div>
+        <div id="ebk-drop" class="dropzone">
+          <div class="dz-icon">📕</div>
+          <div class="dz-main">拖電子書入嚟，或者㩒一下揀檔案</div>
+          <div class="dz-sub">.mobi · .azw3 · .epub · .fb2 · .cbz</div>
+        </div>
+        <input type="file" id="ebk-input" accept=".mobi,.azw3,.azw,.epub,.fb2,.fbz,.cbz" hidden>
+        <div id="ebk-status" class="status-line"></div>
+        <div id="ebk-info" class="info-cards"></div>
+        <div id="ebk-preview" class="ebk-preview"></div>
+        <div class="control-row" id="ebk-actions" hidden>
+          <button class="btn btn-primary" id="ebk-print">列印／另存 PDF</button>
+          <button class="btn" id="ebk-html">下載 HTML</button>
+        </div>
+      </section>
+
       <section id="panel-base64" class="tool-panel" hidden>
         <h2>Base64 編碼／解碼</h2>
         <p class="tool-desc">支援中文（UTF-8）的 Base64 編碼與解碼。</p>
@@ -408,7 +444,6 @@
   <script src="https://cdn.jsdelivr.net/npm/pinyin-pro/dist/index.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.5.3/papaparse.min.js"></script>

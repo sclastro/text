@@ -275,3 +275,38 @@ body.theme-dark .alert-warn { background: #422006; color: #fcd34d; border-color:
   .split-pane { grid-template-columns: 1fr; height: auto; }
   .split-pane .tool-input { height: 200px; }
 }
+
+/* Drop zones (檔案格式偵測 / 電子書轉 PDF) */
+.dropzone {
+  border: 2px dashed var(--border); border-radius: var(--radius);
+  padding: 2.2rem 1rem; text-align: center; cursor: pointer;
+  background: var(--bg-card); transition: border-color .15s, background .15s;
+  margin-top: 1rem;
+}
+.dropzone:hover { border-color: var(--accent); }
+.dropzone.drag-over {
+  border-color: var(--accent); background: rgba(59,130,246,.06);
+  box-shadow: 0 0 0 3px rgba(59,130,246,.18);
+}
+.dz-icon { font-size: 2.2rem; line-height: 1; }
+.dz-main { margin-top: .6rem; font-weight: 600; }
+.dz-sub { margin-top: .25rem; font-size: .82rem; color: var(--text-muted); }
+
+/* 檔案格式偵測 表格內嘅註記 */
+.ft-conf { font-size: .76rem; color: var(--text-muted); }
+.ft-warn { font-size: .78rem; color: var(--danger); }
+
+/* 電子書內容預覽 */
+.ebk-preview {
+  margin-top: 1rem; padding: .9rem 1rem; border: 1px solid var(--border);
+  border-radius: var(--radius); background: var(--bg-card);
+  color: var(--text-muted); font-size: .88rem; line-height: 1.8;
+}
+.ebk-preview:empty { display: none; }
+
+/* `hidden` 屬性要壓得過 .control-row 等嘅 display:flex，否則收唔起 */
+[hidden] { display: none !important; }
+
+/* 檔案格式偵測表格：避免格式欄太窄而斷行難睇 */
+#ft-output td:nth-child(3) { min-width: 9rem; }
+#ft-output td:nth-child(5) { font-size: .8rem; }
