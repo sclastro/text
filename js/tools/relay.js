@@ -60,6 +60,9 @@ export function init() {
     return res;
   }
 
+  // 由 /api/ping 得知嘅伺服器設定，用嚟喺狀態列顯示上限
+  let limits = null;
+
   async function refresh() {
     if (!ready()) return;
     try {
@@ -69,10 +72,18 @@ export function init() {
     } catch (e) { setStatus('✗ ' + e.message, 'error'); }
   }
 
+  const limitNote = expireDays => {
+    const bits = [];
+    if (limits?.maxMB) bits.push(`單檔上限 ${limits.maxMB} MB`);
+    const d = expireDays || limits?.expireDays;
+    if (d) bits.push(`${d} 日後自動刪除`);
+    return bits.length ? `（${bits.join('，')}）` : '';
+  };
+
   function render(files, expireDays) {
     if (!files.length) {
       listBox.innerHTML = '<p class="tool-desc" style="margin:0">（暫時未有檔案）</p>';
-      setStatus(`✓ 連線正常${expireDays ? `，檔案 ${expireDays} 日後自動刪除` : ''}`, 'success');
+      setStatus(`✓ 連線正常，暫時未有檔案${limitNote(expireDays)}`, 'success');
       return;
     }
     let html = '<table class="data-table"><thead><tr><th>檔名</th><th>大小</th><th>剩餘時間</th><th>操作</th></tr></thead><tbody>';
@@ -85,7 +96,7 @@ export function init() {
             <button class="btn rl-del" data-id="${esc(f.id)}">刪除</button></td></tr>`;
     }
     listBox.innerHTML = html + '</tbody></table>';
-    setStatus(`✓ 共 ${files.length} 個檔案${expireDays ? `，${expireDays} 日後自動刪除` : ''}`, 'success');
+    setStatus(`✓ 共 ${files.length} 個檔案${limitNote(expireDays)}`, 'success');
   }
 
   async function upload(files) {
@@ -114,7 +125,8 @@ export function init() {
     setStatus('測試連線中…');
     try {
       const r = await api('/api/ping');
-      setStatus(`✓ 連線成功（單檔上限 ${r.maxMB} MB，${r.expireDays} 日後自動刪除）`, 'success');
+      limits = { maxMB: r.maxMB, expireDays: r.expireDays };
+      setStatus(`✓ 連線成功${limitNote(r.expireDays)}`, 'success');
       panel.hidden = false;
       refresh();
     } catch (e) {
@@ -155,5 +167,11 @@ export function init() {
     }
   });
 
-  if (c.url && c.pass) refresh();
+  // 重開個頁面時，順便攞返伺服器設定（上限／保留日數）先至列清單
+  if (c.url && c.pass) {
+    api('/api/ping')
+      .then(r => { limits = { maxMB: r.maxMB, expireDays: r.expireDays }; })
+      .catch(() => { /* 連唔到就由 refresh 報錯 */ })
+      .finally(refresh);
+  }
 }
