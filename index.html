@@ -55,6 +55,7 @@
         <li class="nav-category">檔案工具</li>
         <li class="nav-item" data-tool="filetype">檔案格式偵測</li>
         <li class="nav-item" data-tool="ebook">電子書轉 PDF</li>
+        <li class="nav-item" data-tool="relay">檔案中轉站</li>
 
         <li class="nav-category">額外工具</li>
         <li class="nav-item" data-tool="base64">Base64 編碼</li>
@@ -72,7 +73,7 @@
     <main id="content">
       <section id="panel-home" class="tool-panel">
         <h1>🀄 歡迎使用中文工具箱</h1>
-        <p class="tool-desc">21 個純前端工具，全部喺你嘅瀏覽器本地運行，無需後端或 API Key。請從左側選單揀工具開始。</p>
+        <p class="tool-desc">24 個工具。除咗「檔案中轉站」（連你自己嘅 Cloudflare Worker）之外，全部喺你嘅瀏覽器本地運行，無需後端或 API Key。請從左側選單揀工具開始。</p>
         <div class="home-grid" id="home-grid"></div>
       </section>
 
@@ -350,7 +351,7 @@
           <div class="dz-main">拖檔案入嚟，或者㩒一下揀檔案</div>
           <div class="dz-sub">可以一次揀多個檔案</div>
         </div>
-        <input type="file" id="ft-input" multiple hidden>
+        <input type="file" id="ft-input" class="sr-only" multiple aria-label="揀要偵測格式嘅檔案">
         <div id="ft-status" class="status-line"></div>
         <div class="table-wrapper"><table id="ft-output" class="data-table"></table></div>
       </section>
@@ -364,13 +365,43 @@
           <div class="dz-main">拖電子書入嚟，或者㩒一下揀檔案</div>
           <div class="dz-sub">.mobi · .azw3 · .epub · .fb2 · .cbz</div>
         </div>
-        <input type="file" id="ebk-input" accept=".mobi,.azw3,.azw,.epub,.fb2,.fbz,.cbz" hidden>
+        <input type="file" id="ebk-input" class="sr-only" accept=".mobi,.azw3,.azw,.epub,.fb2,.fbz,.cbz" aria-label="揀電子書檔案">
         <div id="ebk-status" class="status-line"></div>
         <div id="ebk-info" class="info-cards"></div>
         <div id="ebk-preview" class="ebk-preview"></div>
         <div class="control-row" id="ebk-actions" hidden>
           <button class="btn btn-primary" id="ebk-print">列印／另存 PDF</button>
           <button class="btn" id="ebk-html">下載 HTML</button>
+        </div>
+      </section>
+
+      <section id="panel-relay" class="tool-panel" hidden>
+        <h2>檔案中轉站</h2>
+        <p class="tool-desc">手機擺低、電腦攞返（或者相反）。檔案存喺<strong>你自己嘅</strong> Cloudflare Worker，到期自動刪除。設定只留喺你部機，唔會傳去任何第三方。</p>
+        <div class="alert alert-warn">⚠️ 要先開一個免費 Cloudflare 帳戶並部署 Worker。做法見 <code>worker/SETUP.md</code>（唔使信用卡）。</div>
+
+        <div class="control-col">
+          <label>Worker 網址
+            <input type="url" id="rl-url" class="tool-input" placeholder="https://xxx.workers.dev">
+          </label>
+          <label>通行碼
+            <input type="password" id="rl-pass" class="tool-input" placeholder="你喺 Cloudflare 設定嘅 PASSPHRASE">
+          </label>
+        </div>
+        <div class="control-row">
+          <button class="btn btn-primary" id="rl-save">儲存並測試連線</button>
+          <button class="btn" id="rl-refresh">重新整理清單</button>
+        </div>
+        <div id="rl-status" class="status-line"></div>
+
+        <div id="rl-panel" hidden>
+          <div id="rl-drop" class="dropzone">
+            <div class="dz-icon">📤</div>
+            <div class="dz-main">拖檔案入嚟上載，或者㩒一下揀檔案</div>
+            <div class="dz-sub">可以一次揀多個檔案</div>
+          </div>
+          <input type="file" id="rl-file" class="sr-only" multiple aria-label="揀要上載嘅檔案">
+          <div class="table-wrapper" id="rl-list"></div>
         </div>
       </section>
 

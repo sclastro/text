@@ -18,6 +18,7 @@ const TOOLS = [
   { id: 'cangjie', name: '倉頡／速成', cat: '中文特色' },
   { id: 'filetype', name: '檔案格式偵測', cat: '檔案工具' },
   { id: 'ebook', name: '電子書轉 PDF', cat: '檔案工具' },
+  { id: 'relay', name: '檔案中轉站', cat: '檔案工具' },
   { id: 'base64', name: 'Base64 編碼', cat: '額外工具' },
   { id: 'urlencode', name: 'URL 編碼', cat: '額外工具' },
   { id: 'mojibake', name: '亂碼修復', cat: '額外工具' },
@@ -273,7 +274,7 @@ document.addEventListener('click', e => {
 const filePicker = document.createElement('input');
 filePicker.type = 'file';
 filePicker.accept = '.txt,.json,.csv,.tsv,.md,.xml,.html,.log,.srt,text/*,application/json';
-filePicker.hidden = true;
+filePicker.className = 'sr-only'; // 唔用 hidden，否則部分瀏覽器唔肯開檔案對話框
 document.body.appendChild(filePicker);
 let pickerTarget = null;
 

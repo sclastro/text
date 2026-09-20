@@ -310,3 +310,11 @@ body.theme-dark .alert-warn { background: #422006; color: #fcd34d; border-color:
 /* 檔案格式偵測表格：避免格式欄太窄而斷行難睇 */
 #ft-output td:nth-child(3) { min-width: 9rem; }
 #ft-output td:nth-child(5) { font-size: .8rem; }
+
+/* 視覺上收起但仍然可用（畀螢幕閱讀器同鍵盤用家）。
+   file input 唔應該用 hidden 屬性 —— hidden 嘅語意係「唔相關」，
+   但呢啲 input 係功能性嘅，只係外觀由 dropzone 取代。 */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
