@@ -50,7 +50,7 @@ icons/            App 圖示
 4. `sw.js`：`PRECACHE` 加 `js/tools/<id>.js`。
 5. `README.md`：功能清單及工具總數。
 
-**Service Worker 版本**：凡修改任何會被快取的檔案（HTML、CSS、JS、資料、圖示），必須將 `sw.js` 的 `VERSION` 加一（現為 `v7`），否則已安裝的使用者不會取得更新。
+**Service Worker 版本**：凡修改任何會被快取的檔案（HTML、CSS、JS、資料、圖示），必須將 `sw.js` 的 `VERSION` 加一（現為 `v8`），否則已安裝的使用者不會取得更新。
 
 **第三方 library** 一律由 CDN（jsDelivr／cdnjs）載入，不引入打包工具。部分於 `index.html` 以 `<script>` 載入，部分由工具模組按需載入（例如電子書工具的 foliate-js）。
 
@@ -65,6 +65,7 @@ icons/            App 圖示
 - Worker 綁定名稱固定：KV 為 `FILES`，Secret 為 `PASSPHRASE`；選用變數 `MAX_MB`（上限 24，受 KV 單值 25 MB 所限）及 `EXPIRE_DAYS`（預設 7）。
 - API：`POST /api/upload`、`GET /api/list`、`GET|DELETE /api/file/:id`、`GET /api/ping`，全部須 `X-Auth` 標頭。中文檔名經 `X-Filename` 以 `encodeURIComponent` 傳送。
 - 採用 Workers KV 而非 R2，因為 R2 即使在免費額度內亦須登記信用卡。
+- KV 屬最終一致，上載／刪除後約 60 秒內 `list()` 仍可能傳回舊清單。前端以本機的 `added`／`removed` 紀錄修正清單（保留兩分鐘），因此上載或刪除後不應只靠重新讀取清單來更新畫面。
 
 ## 語言
 

@@ -1,5 +1,5 @@
 // 中文工具箱 — service worker: cache app shell for offline use
-const VERSION = 'v7';
+const VERSION = 'v8';
 const CACHE = `cjk-toolbox-${VERSION}`;
 
 const PRECACHE = [

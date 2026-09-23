@@ -256,7 +256,8 @@ body.theme-dark .alert-warn { background: #422006; color: #fcd34d; border-color:
 /* Mobile */
 #hamburger, #backdrop { display: none; }
 @media (max-width: 768px) {
-  #app { grid-template-columns: 1fr; }
+  /* 選單按鈕佔一行固定頂列，唔再浮喺內容上面遮住捲上去嘅文字 */
+  #app { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
   #sidebar {
     position: fixed; top: 0; left: 0; bottom: 0; width: var(--sidebar-w); z-index: 20;
     transform: translateX(-100%); transition: transform .25s;
@@ -264,14 +265,14 @@ body.theme-dark .alert-warn { background: #422006; color: #fcd34d; border-color:
   #app.sidebar-open #sidebar { transform: translateX(0); }
   #sidebar-close { display: block; }
   #hamburger {
-    display: block; position: fixed; top: .75rem; left: .75rem; z-index: 15;
+    display: block; margin: .75rem .75rem 0; justify-self: start;
     background: var(--accent); color: #fff; border: none; border-radius: var(--radius);
     width: 40px; height: 40px; font-size: 1.2rem; cursor: pointer; box-shadow: var(--shadow);
   }
   #app.sidebar-open #backdrop {
     display: block; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 10;
   }
-  #content { padding: 4rem 1rem 2rem; }
+  #content { padding: 1rem 1rem 2rem; }
   .split-pane { grid-template-columns: 1fr; height: auto; }
   .split-pane .tool-input { height: 200px; }
 }

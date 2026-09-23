@@ -63,11 +63,30 @@ export function init() {
   // 由 /api/ping 得知嘅伺服器設定，用嚟喺狀態列顯示上限
   let limits = null;
 
+  // Workers KV 係最終一致：上載／刪除之後，list() 最多要約 60 秒先反映。
+  // 喺本機記住啱啱做過嘅改動，期間用佢哋修正伺服器傳返嚟嘅舊清單。
+  const PENDING_MS = 2 * 60 * 1000;
+  const added = new Map();    // id → 檔案資料（等緊出現喺清單）
+  const removed = new Map();  // id → 記錄到期時間（等緊喺清單消失）
+  let listed = [], listedDays;  // 最近一次由伺服器攞到嘅清單
+
+  function merge(files = listed) {
+    const now = Date.now();
+    const ids = new Set(files.map(f => f.id));
+    for (const [id, f] of added)
+      if (ids.has(id) || f.until < now) added.delete(id);
+    for (const [id, until] of removed)
+      if (!ids.has(id) || until < now) removed.delete(id);
+    const out = files.filter(f => !removed.has(f.id)).concat([...added.values()]);
+    return out.sort((a, b) => (b.at || 0) - (a.at || 0));
+  }
+
   async function refresh() {
     if (!ready()) return;
     try {
       const data = await api('/api/list');
-      render(data.files || [], data.expireDays);
+      listed = data.files || []; listedDays = data.expireDays;
+      render(merge(), listedDays);
       panel.hidden = false;
     } catch (e) { setStatus('✗ ' + e.message, 'error'); }
   }
@@ -101,10 +120,11 @@ export function init() {
 
   async function upload(files) {
     if (!ready() || !files?.length) return;
+    let failed = '';
     for (const file of [...files]) {
       setStatus(`上載中… ${file.name}（${fmtSize(file.size)}）`);
       try {
-        await api('/api/upload', {
+        const { ok, ...meta } = await api('/api/upload', {
           method: 'POST',
           headers: {
             'X-Filename': encodeURIComponent(file.name),
@@ -112,11 +132,14 @@ export function init() {
           },
           body: file,
         });
-      } catch (e) { setStatus(`✗ ${file.name}：${e.message}`, 'error'); return; }
+        added.set(meta.id, { ...meta, until: Date.now() + PENDING_MS });
+      } catch (e) { failed = `✗ ${file.name}：${e.message}`; break; }
     }
-    setStatus('✓ 上載完成', 'success');
-    // KV 全球同步最多要一分鐘，列表可能唔即刻見到新檔案
-    setTimeout(refresh, 600);
+    // 唔等 KV 同步，即刻將新檔案加入清單
+    panel.hidden = false;
+    render(merge(), listedDays);
+    if (failed) setStatus(failed, 'error');
+    else setStatus(`✓ 上載完成。其他裝置約一分鐘內會喺清單見到${limitNote(listedDays)}`, 'success');
   }
 
   $('rl-save').addEventListener('click', async () => {
@@ -162,7 +185,14 @@ export function init() {
     }
     if (del) {
       if (!confirm('確定要刪除呢個檔案？')) return;
-      try { await api('/api/file/' + del.dataset.id, { method: 'DELETE' }); refresh(); }
+      const id = del.dataset.id;
+      try {
+        await api('/api/file/' + id, { method: 'DELETE' });
+        // 唔等 KV 同步，即刻喺清單移除
+        added.delete(id);
+        removed.set(id, Date.now() + PENDING_MS);
+        render(merge(), listedDays);
+      }
       catch (err) { setStatus('✗ ' + err.message, 'error'); }
     }
   });
