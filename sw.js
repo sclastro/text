@@ -1,5 +1,5 @@
 // 中文工具箱 — service worker: cache app shell for offline use
-const VERSION = 'v8';
+const VERSION = 'v9';
 const CACHE = `cjk-toolbox-${VERSION}`;
 
 const PRECACHE = [
@@ -16,6 +16,7 @@ const PRECACHE = [
   'js/tools/cangjie.js',
   'js/tools/filetype.js',
   'js/tools/ebook.js',
+  'js/tools/pdfsplit.js',
   'js/tools/relay.js',
   'js/tools/charfreq.js',
   'js/tools/chinesenum.js',
@@ -34,6 +35,7 @@ const PRECACHE = [
   'js/tools/units.js',
   'js/tools/unshorten.js',
   'js/tools/urlencode.js',
+  'js/tools/wheel.js',
   'js/tools/whitespace.js',
   'js/tools/wordcount.js',
 ];

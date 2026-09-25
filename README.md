@@ -25,7 +25,7 @@ PDF 匯出（Markdown 同電子書）一律經瀏覽器嘅列印引擎，而唔�
 （約 268 MP）—— 實測大約 3–5 萬字之後 `toDataURL` 就會靜靜雞失敗，匯出空白檔而唔報錯。
 列印引擎用系統中文字型，輸出係真文字，10 萬字嘅書都冇問題。
 
-## 功能（24 個工具）
+## 功能（26 個工具）
 
 ### 文字處理
 - **字數統計** — 字元、中文字、英文詞、段落、預估閱讀時間
@@ -48,10 +48,12 @@ PDF 匯出（Markdown 同電子書）一律經瀏覽器嘅列印引擎，而唔�
 - **時區轉換** — 多時區對照，顯示星期
 - **單位換算** — 長度／重量／溫度／面積，含港式單位（斤、両、呎）
 - **短網址還原** — 還原短網址（受瀏覽器 CORS 限制）
+- **抽獎轉盤** — 輸入學號範圍（可剔除缺席），轉盤停低指住邊個就係邊個；可揀抽中後移除（唔會重複），支援全螢幕投影、空白鍵抽、已抽紀錄重開頁面都保留
 
 ### 檔案工具
 - **檔案格式偵測** — 讀檔頭簽章（magic number）辨認真實格式，唔靠副檔名；會揪出副檔名同實際格式唔一致嘅檔案
 - **電子書轉 PDF** — MOBI／AZW3／EPUB／FB2／CBZ，本機解析，輸出真文字 PDF（可揀、可搜尋）
+- **PDF 分拆** — 將一個 PDF 分成幾份，每份自訂由第幾頁至第幾頁（可喺縮圖上點選），可逐份下載或全部打包 ZIP；有縮圖同放大預覽，本機處理
 - **檔案中轉站** — 手機擺低、電腦攞返。經你自己嘅 Cloudflare Worker，到期自動刪除。設定見 [`worker/SETUP.md`](worker/SETUP.md)（唔使信用卡）
 
 ### 中文特色
@@ -85,7 +87,7 @@ python3 -m http.server 8000
 
 - 純 HTML / CSS / JavaScript（ES modules），無建置步驟
 - 第三方 library 由 CDN 載入（jsDelivr / cdnjs），首次載入後瀏覽器會快取：
-  OpenCC-JS、pinyin-pro、to-jyutping、Marked、DOMPurify、qrcodejs、lunar-javascript、PapaParse、foliate-js（電子書解析）
+  OpenCC-JS、pinyin-pro、to-jyutping、Marked、DOMPurify、qrcodejs、lunar-javascript、PapaParse、foliate-js（電子書解析）、pdf-lib（PDF 分拆）、pdf.js（PDF 預覽）
 - 倉頡資料內建於 `data/cangjie.js`（來源：[ikwbb/cangjie-practice-tool](https://github.com/ikwbb/cangjie-practice-tool)）
 
 ## 檔案結構
