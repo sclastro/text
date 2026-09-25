@@ -1,8 +1,8 @@
 // 電子書轉 PDF — MOBI / AZW3 / EPUB / FB2 / CBZ
-// 用 foliate-js 喺本地解析（檔案唔會上傳），再交畀瀏覽器嘅列印引擎輸出 PDF。
-// 用列印而唔用 html2canvas 嘅原因：canvas 有面積上限，約 3–5 萬字之後
-// toDataURL 會靜靜雞失敗出空白檔；而且影相出嚟嘅 PDF 冇文字層，
-// 揀唔到、搜尋唔到。列印引擎用系統中文字型，文字係真文字，檔案又細。
+// 以 foliate-js 在本地解析（檔案不會上傳），再交由瀏覽器的列印引擎輸出 PDF。
+// 採用列印而不用 html2canvas 的原因：canvas 有面積上限，約三至五萬字後
+// toDataURL 會無聲失敗，輸出空白檔；而且截圖產生的 PDF 沒有文字層，
+// 無法選取及搜尋。列印引擎使用系統中文字型，輸出為真文字，檔案亦較小。
 
 const FOLIATE = 'https://cdn.jsdelivr.net/npm/foliate-js@1.0.1/view.js';
 
@@ -94,8 +94,8 @@ export function init() {
     } catch (e) {
       const m = String(e?.message || e);
       setStatus(/drm|encrypt/i.test(m)
-        ? '✗ 呢個檔案有 DRM 保護，無法開啟。'
-        : '✗ 無法解析：' + m + '（支援 .mobi/.azw3/.epub/.fb2/.cbz；有 DRM 嘅檔案開唔到）', 'error');
+        ? '✗ 此檔案設有 DRM 保護，無法開啟。'
+        : '✗ 無法解析：' + m + '（支援 .mobi/.azw3/.epub/.fb2/.cbz；設有 DRM 的檔案無法開啟）', 'error');
       return;
     }
 
@@ -114,14 +114,14 @@ export function init() {
           html += `<section class="ebk-sec">${body}</section>\n`;
           chars += body.replace(/<[^>]+>/g, '').replace(/\s/g, '').length;
         }
-      } catch { /* 個別章節失敗就跳過，唔好成本書炒 */ }
+      } catch { /* 個別章節失敗則略過，以免整本書轉換失敗 */ }
       section.unload?.();
       done++;
       if (done % 5 === 0 || done === secs.length)
         setStatus(`解析中… ${done}/${secs.length} 章`);
     }
 
-    if (!chars) { setStatus('✗ 抽唔到任何文字內容（可能係純圖片書或有 DRM）', 'error'); return; }
+    if (!chars) { setStatus('✗ 無法擷取任何文字內容（可能是純圖片書籍或設有 DRM）', 'error'); return; }
 
     Object.assign(state, { html, title, author, chars, sections: secs.length });
 
@@ -137,7 +137,7 @@ export function init() {
     setStatus(`✓ 解析完成：${secs.length} 章、${chars.toLocaleString()} 字`, 'success');
   }
 
-  // 用隱藏 iframe 列印，避免彈出視窗被瀏覽器封鎖
+  // 用隱藏 iframe 列印，避免彈出視窗遭瀏覽器封鎖
   function printBook() {
     if (!state.html) return;
     const old = document.getElementById('ebk-print-frame');
@@ -156,7 +156,7 @@ export function init() {
     };
     if (doc.readyState === 'complete') setTimeout(go, 300);
     else frame.onload = () => setTimeout(go, 300);
-    setStatus('已開啟列印視窗 —— 喺「目的地」揀「另存為 PDF」即可。', 'success');
+    setStatus('已開啟列印視窗，在「目的地」選擇「另存為 PDF」即可。', 'success');
   }
 
   input.addEventListener('change', () => { convert(input.files[0]); input.value = ''; });

@@ -1,21 +1,21 @@
 /**
  * 檔案中轉站 — Cloudflare Worker
  * =================================================
- * 手機上載 → 電腦下載（或者相反）。檔案存喺 Cloudflare Workers KV，
- * 到期自動刪除。唔使信用卡，免費額度內零成本。
+ * 手機上載 → 電腦下載（反之亦可）。檔案存於 Cloudflare Workers KV，
+ * 到期自動刪除。毋須信用卡，在免費額度內不收費用。
  *
- * 部署設定（喺 Cloudflare 網頁介面做，唔使裝任何嘢）：
- *   1. KV 綁定  變數名稱必須係  FILES      → 指向你個 KV namespace
- *   2. 密鑰     變數名稱必須係  PASSPHRASE → 你自己諗嘅通行碼（用 Secret，唔好用普通變數）
- *   3. （選用）變數 MAX_MB      預設 24；KV 單一值上限係 25 MB，唔好調高過 24
- *   4. （選用）變數 EXPIRE_DAYS 預設 7；幾多日之後自動刪除
+ * 部署設定（在 Cloudflare 網頁介面完成，毋須安裝任何軟件）：
+ *   1. KV 綁定  變數名稱必須為  FILES      → 指向你的 KV namespace
+ *   2. 密鑰     變數名稱必須為  PASSPHRASE → 自訂的通行碼（須用 Secret，不可用普通變數）
+ *   3. （選用）變數 MAX_MB      預設 24；KV 單一值上限為 25 MB，不可高於 24
+ *   4. （選用）變數 EXPIRE_DAYS 預設 7；檔案保存日數，到期自動刪除
  *
  * API：
  *   POST   /api/upload      上載（檔案內容放 body，檔名放 X-Filename 標頭，需 X-Auth）
- *   GET    /api/list        列出未過期嘅檔案（需 X-Auth）
+ *   GET    /api/list        列出未過期的檔案（需 X-Auth）
  *   GET    /api/file/:id    下載（需 X-Auth）
  *   DELETE /api/file/:id    刪除（需 X-Auth）
- *   GET    /api/ping        測試通行碼啱唔啱（需 X-Auth）
+ *   GET    /api/ping        測試通行碼是否正確（需 X-Auth）
  */
 
 const CORS = {
@@ -40,18 +40,18 @@ function sameSecret(a, b) {
   return diff === 0;
 }
 
-// 短、易讀、唔會撈亂嘅代碼（冇 0/O/1/I）
+// 簡短、易讀、不易混淆的代碼（不含 0/O/1/I）
 function newId(len = 8) {
   const alphabet = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
   const bytes = crypto.getRandomValues(new Uint8Array(len));
   return [...bytes].map(b => alphabet[b % alphabet.length]).join('');
 }
 
-// 檔名可以係中文，所以經 header 傳嗰陣要 encodeURIComponent
+// 檔名可以是中文，故經 header 傳送時須 encodeURIComponent
 function decodeName(raw) {
   if (!raw) return 'file';
   let name = raw;
-  try { name = decodeURIComponent(raw); } catch { /* 唔係編碼過就照用 */ }
+  try { name = decodeURIComponent(raw); } catch { /* 未經編碼則直接使用 */ }
   name = name.replace(/[\\/\u0000-\u001f]/g, '_').trim();
   return name.slice(0, 120) || 'file';
 }
@@ -63,12 +63,12 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname.replace(/\/+$/, '');
 
-    if (!env.FILES) return json({ error: '未設定 KV 綁定（變數名稱要係 FILES）' }, 500);
+    if (!env.FILES) return json({ error: '未設定 KV 綁定（變數名稱須為 FILES）' }, 500);
     if (!env.PASSPHRASE) return json({ error: '未設定 PASSPHRASE 密鑰' }, 500);
 
-    // 除咗 CORS 預檢，所有請求都要通行碼
+    // 除 CORS 預檢外，所有請求均須通行碼
     if (!sameSecret(request.headers.get('X-Auth') || '', env.PASSPHRASE))
-      return json({ error: '通行碼唔啱' }, 401);
+      return json({ error: '通行碼錯誤' }, 401);
 
     const maxBytes = Math.min(Number(env.MAX_MB) || 24, 24) * 1024 * 1024;
     const expireDays = Math.max(Number(env.EXPIRE_DAYS) || 7, 1);
@@ -84,7 +84,7 @@ export default {
           return json({ error: `檔案太大（上限 ${Math.round(maxBytes / 1048576)} MB）` }, 413);
 
         const body = await request.arrayBuffer();
-        if (!body.byteLength) return json({ error: '冇收到檔案內容' }, 400);
+        if (!body.byteLength) return json({ error: '未收到檔案內容' }, 400);
         if (body.byteLength > maxBytes)
           return json({ error: `檔案太大（上限 ${Math.round(maxBytes / 1048576)} MB）` }, 413);
 
@@ -111,7 +111,7 @@ export default {
 
         if (request.method === 'GET') {
           const { value, metadata } = await env.FILES.getWithMetadata(id, { type: 'arrayBuffer' });
-          if (!value) return json({ error: '搵唔到呢個檔案（可能已經過期或者刪咗）' }, 404);
+          if (!value) return json({ error: '找不到此檔案（可能已過期或已刪除）' }, 404);
           const meta = metadata || {};
           const name = meta.name || 'file';
           return new Response(value, {
@@ -131,13 +131,13 @@ export default {
         const files = keys.map(k => ({
           id: k.name,
           ...(k.metadata || {}),
-          // KV 自己會刪，但列表順手過濾走已過期嘅
+          // KV 會自行刪除過期項目，但列表時亦一併過濾
         })).filter(f => !f.exp || f.exp > Date.now());
         files.sort((a, b) => (b.at || 0) - (a.at || 0));
         return json({ ok: true, files, expireDays });
       }
 
-      return json({ error: '唔認得呢個路徑' }, 404);
+      return json({ error: '無法辨認此路徑' }, 404);
     } catch (err) {
       return json({ error: '伺服器錯誤：' + (err?.message || String(err)) }, 500);
     }

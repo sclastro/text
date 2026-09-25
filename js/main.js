@@ -239,7 +239,7 @@ document.addEventListener('click', e => {
   const kind = btn.dataset.kind || 'text';
   let { text, mime } = extractForDownload(target, kind);
 
-  if (!text.trim()) { flash('冇內容'); return; }
+  if (!text.trim()) { flash('沒有內容'); return; }
 
   let filename = btn.dataset.filename || 'output.txt';
   // When the output format varies (e.g. Base64 decode), name it .json if it really is JSON.
@@ -276,7 +276,7 @@ document.addEventListener('click', e => {
 const filePicker = document.createElement('input');
 filePicker.type = 'file';
 filePicker.accept = '.txt,.json,.csv,.tsv,.md,.xml,.html,.log,.srt,text/*,application/json';
-filePicker.className = 'sr-only'; // 唔用 hidden，否則部分瀏覽器唔肯開檔案對話框
+filePicker.className = 'sr-only'; // 不用 hidden，否則部分瀏覽器不會開啟檔案對話框
 document.body.appendChild(filePicker);
 let pickerTarget = null;
 

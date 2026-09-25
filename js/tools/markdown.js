@@ -4,12 +4,12 @@ function render(input, preview) {
   preview.innerHTML = window.DOMPurify ? DOMPurify.sanitize(raw) : raw;
 }
 
-// 用瀏覽器列印引擎輸出 PDF，唔用 html2canvas 影相。
+// 以瀏覽器列印引擎輸出 PDF，不用 html2canvas 截圖。
 // html2canvas 會將成份文件畫成一張巨型 canvas，而 canvas 有面積上限
-// （約 268 MP）：實測大約 3–5 萬字之後 toDataURL 就會靜靜雞失敗，
-// 匯出一個空白 PDF 而唔會報錯。影相出嚟嘅 PDF 亦冇文字層，
-// 揀唔到、搜尋唔到，檔案仲大幾倍。列印引擎用系統中文字型，
-// 輸出係真文字，長文件都冇上限。
+// （約 268 MP）：實測約三至五萬字後 toDataURL 便會無聲失敗，
+// 匯出空白 PDF 而不報錯。截圖產生的 PDF 亦沒有文字層，
+// 無法選取及搜尋，檔案更大數倍。列印引擎使用系統中文字型，
+// 輸出為真文字，長文件亦無上限。
 function printHtml(bodyHtml, title) {
   const old = document.getElementById('md-print-frame');
   if (old) old.remove();

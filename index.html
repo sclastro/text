@@ -75,14 +75,14 @@
     <main id="content">
       <section id="panel-home" class="tool-panel">
         <h1>🀄 歡迎使用中文工具箱</h1>
-        <p class="tool-desc">26 個工具。除咗「檔案中轉站」（連你自己嘅 Cloudflare Worker）之外，全部喺你嘅瀏覽器本地運行，無需後端或 API Key。請從左側選單揀工具開始。</p>
+        <p class="tool-desc">26 個工具。除「檔案中轉站」須連接你自己的 Cloudflare Worker 外，全部在瀏覽器本地運行，無需後端或 API Key。請從左側選單選擇工具。</p>
         <div class="home-grid" id="home-grid"></div>
       </section>
 
       <section id="panel-wordcount" class="tool-panel" hidden>
         <h2>字數統計</h2>
         <p class="tool-desc">統計字元、中文字、詞、段落數量，並估算閱讀時間。</p>
-        <textarea id="wc-input" class="tool-input" rows="12" placeholder="喺度貼上或輸入文字…"></textarea>
+        <textarea id="wc-input" class="tool-input" rows="12" placeholder="在此貼上或輸入文字…"></textarea>
         <div class="stats-grid">
           <div class="stat-card"><span class="stat-val" id="wc-chars">0</span><span class="stat-lbl">字元（含空白）</span></div>
           <div class="stat-card"><span class="stat-val" id="wc-nospace">0</span><span class="stat-lbl">字元（不含空白）</span></div>
@@ -313,7 +313,7 @@
 
       <section id="panel-wheel" class="tool-panel" hidden>
         <h2>抽獎轉盤</h2>
-        <p class="tool-desc">輸入學號範圍，㩒轉盤中間嘅「抽」（或者空白鍵），轉盤停低時指針指住嘅就係抽中嘅學號。</p>
+        <p class="tool-desc">輸入學號範圍，按轉盤中央的「抽」（或空白鍵），轉盤停下時指針所指的學號即為抽中者。</p>
         <div class="control-row">
           <label>由 <input type="number" id="wh-from" class="tool-input wh-num" value="1" min="0" max="9999" inputmode="numeric"> 號</label>
           <label>至 <input type="number" id="wh-to" class="tool-input wh-num" value="36" min="0" max="9999" inputmode="numeric"> 號</label>
@@ -324,7 +324,7 @@
           </label>
         </div>
         <div class="control-row">
-          <label><input type="checkbox" id="wh-norepeat" checked> 抽中後移除（唔會重複抽中）</label>
+          <label><input type="checkbox" id="wh-norepeat" checked> 抽中後移除（不會重複抽中）</label>
           <label><input type="checkbox" id="wh-sound" checked> 音效</label>
         </div>
         <div id="wh-info" class="status-line"></div>
@@ -380,27 +380,27 @@
 
       <section id="panel-filetype" class="tool-panel" hidden>
         <h2>檔案格式偵測</h2>
-        <p class="tool-desc">唔記得個檔係咩格式？拖檔案入嚟，讀取檔頭簽章（magic number）辨認真實格式，唔靠副檔名。完全喺本機分析，檔案唔會上傳。</p>
+        <p class="tool-desc">不知道檔案屬何種格式？將檔案拖放到此處，即可讀取檔頭簽章（magic number）辨認真實格式，不依賴副檔名。分析全在本機完成，檔案不會上傳。</p>
         <div id="ft-drop" class="dropzone">
           <div class="dz-icon">📄</div>
-          <div class="dz-main">拖檔案入嚟，或者㩒一下揀檔案</div>
-          <div class="dz-sub">可以一次揀多個檔案</div>
+          <div class="dz-main">將檔案拖放到此處，或按此選擇檔案</div>
+          <div class="dz-sub">可一次選擇多個檔案</div>
         </div>
-        <input type="file" id="ft-input" class="sr-only" multiple aria-label="揀要偵測格式嘅檔案">
+        <input type="file" id="ft-input" class="sr-only" multiple aria-label="選擇要偵測格式的檔案">
         <div id="ft-status" class="status-line"></div>
         <div class="table-wrapper"><table id="ft-output" class="data-table"></table></div>
       </section>
 
       <section id="panel-ebook" class="tool-panel" hidden>
         <h2>電子書轉 PDF</h2>
-        <p class="tool-desc">支援 MOBI、AZW3、EPUB、FB2、CBZ。喺你部機本地解析，檔案唔會上傳。輸出用瀏覽器列印引擎，PDF 入面係真文字（可揀、可搜尋），中文正常。</p>
-        <div class="alert alert-warn">⚠️ 有 DRM 保護嘅檔案（例如喺 Amazon 買嘅 Kindle 書）無法開啟 —— 呢個係加密限制，任何工具都做唔到。</div>
+        <p class="tool-desc">支援 MOBI、AZW3、EPUB、FB2、CBZ。在本機解析，檔案不會上傳。以瀏覽器列印引擎輸出，PDF 內為真文字（可選取、可搜尋），中文顯示正常。</p>
+        <div class="alert alert-warn">⚠️ 設有 DRM 保護的檔案（例如在 Amazon 購買的 Kindle 電子書）無法開啟。這是加密限制，任何工具都無法處理。</div>
         <div id="ebk-drop" class="dropzone">
           <div class="dz-icon">📕</div>
-          <div class="dz-main">拖電子書入嚟，或者㩒一下揀檔案</div>
+          <div class="dz-main">將電子書拖放到此處，或按此選擇檔案</div>
           <div class="dz-sub">.mobi · .azw3 · .epub · .fb2 · .cbz</div>
         </div>
-        <input type="file" id="ebk-input" class="sr-only" accept=".mobi,.azw3,.azw,.epub,.fb2,.fbz,.cbz" aria-label="揀電子書檔案">
+        <input type="file" id="ebk-input" class="sr-only" accept=".mobi,.azw3,.azw,.epub,.fb2,.fbz,.cbz" aria-label="選擇電子書檔案">
         <div id="ebk-status" class="status-line"></div>
         <div id="ebk-info" class="info-cards"></div>
         <div id="ebk-preview" class="ebk-preview"></div>
@@ -412,13 +412,13 @@
 
       <section id="panel-pdfsplit" class="tool-panel" hidden>
         <h2>PDF 分拆</h2>
-        <p class="tool-desc">將一個 PDF 按頁數分成幾份，每份自己揀由第幾頁至第幾頁。喺你部機本地處理，檔案唔會上傳。</p>
+        <p class="tool-desc">將一個 PDF 按頁數分成若干份，每份可自訂起訖頁數。在本機處理，檔案不會上傳。</p>
         <div id="ps-drop" class="dropzone">
           <div class="dz-icon">✂️</div>
-          <div class="dz-main">拖 PDF 入嚟，或者㩒一下揀檔案</div>
+          <div class="dz-main">將 PDF 拖放到此處，或按此選擇檔案</div>
           <div class="dz-sub">.pdf</div>
         </div>
-        <input type="file" id="ps-input" class="sr-only" accept=".pdf,application/pdf" aria-label="揀 PDF 檔案">
+        <input type="file" id="ps-input" class="sr-only" accept=".pdf,application/pdf" aria-label="選擇 PDF 檔案">
         <div id="ps-status" class="status-line"></div>
 
         <div id="ps-work" hidden>
@@ -430,22 +430,22 @@
           </div>
 
           <h3 class="ps-title">頁面預覽</h3>
-          <p class="tool-desc">先㩒上面其中一份（會有藍框），再喺下面點縮圖：第一下設起始頁，第二下設結束頁。㩒 🔍 放大睇。</p>
+          <p class="tool-desc">先在上方選定其中一份（以藍框標示），再點選下方縮圖：第一下設定起始頁，第二下設定結束頁。按 🔍 可放大檢視。</p>
           <div id="ps-thumbs" class="ps-thumbs"></div>
         </div>
       </section>
 
       <section id="panel-relay" class="tool-panel" hidden>
         <h2>檔案中轉站</h2>
-        <p class="tool-desc">手機擺低、電腦攞返（或者相反）。檔案存喺<strong>你自己嘅</strong> Cloudflare Worker，到期自動刪除。設定只留喺你部機，唔會傳去任何第三方。</p>
-        <div class="alert alert-warn">⚠️ 要先開一個免費 Cloudflare 帳戶並部署 Worker。做法見 <code>worker/SETUP.md</code>（唔使信用卡）。</div>
+        <p class="tool-desc">手機上載，電腦下載（反之亦可）。檔案存放於<strong>你自己的</strong> Cloudflare Worker，到期自動刪除。設定只保存在本機，不會傳送給任何第三方。</p>
+        <div class="alert alert-warn">⚠️ 須先開設免費 Cloudflare 帳戶並部署 Worker，步驟見 <code>worker/SETUP.md</code>（毋須信用卡）。</div>
 
         <div class="control-col">
           <label>Worker 網址
             <input type="url" id="rl-url" class="tool-input" placeholder="https://xxx.workers.dev">
           </label>
           <label>通行碼
-            <input type="password" id="rl-pass" class="tool-input" placeholder="你喺 Cloudflare 設定嘅 PASSPHRASE">
+            <input type="password" id="rl-pass" class="tool-input" placeholder="你在 Cloudflare 設定的 PASSPHRASE">
           </label>
         </div>
         <div class="control-row">
@@ -457,10 +457,10 @@
         <div id="rl-panel" hidden>
           <div id="rl-drop" class="dropzone">
             <div class="dz-icon">📤</div>
-            <div class="dz-main">拖檔案入嚟上載，或者㩒一下揀檔案</div>
-            <div class="dz-sub">可以一次揀多個檔案</div>
+            <div class="dz-main">將檔案拖放到此處上載，或按此選擇檔案</div>
+            <div class="dz-sub">可一次選擇多個檔案</div>
           </div>
-          <input type="file" id="rl-file" class="sr-only" multiple aria-label="揀要上載嘅檔案">
+          <input type="file" id="rl-file" class="sr-only" multiple aria-label="選擇要上載的檔案">
           <div class="table-wrapper" id="rl-list"></div>
         </div>
       </section>

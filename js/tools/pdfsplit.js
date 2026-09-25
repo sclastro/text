@@ -1,12 +1,12 @@
 // PDF 分拆 — 將一個 PDF 按頁數範圍分成幾份，可逐份下載或打包 ZIP。
-// 切割用 pdf-lib，縮圖預覽用 pdf.js；兩者都喺本機運行，檔案唔會上傳。
-// 預覽載入失敗（例如離線而又未快取）都照樣可以分拆，只係冇縮圖。
+// 以 pdf-lib 切割，以 pdf.js 產生縮圖預覽；兩者均在本機運行，檔案不會上傳。
+// 預覽載入失敗（例如離線而未有快取）時仍可分拆，只是沒有縮圖。
 
 const PDFLIB = 'https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js';
 const PDFJS = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.min.mjs';
 const PDFJS_WORKER = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.worker.min.mjs';
 
-// 每份一隻顏色，縮圖上用同一隻色標示屬於邊份
+// 每份一種顏色，縮圖以相同顏色標示所屬的份
 const COLORS = ['#3b82f6', '#ef4444', '#16a34a', '#d97706', '#9333ea', '#0891b2', '#db2777', '#65a30d'];
 
 function loadScript(src) {
@@ -28,7 +28,7 @@ const loadPdfjs = () => (pdfjsReady ??= import(PDFJS).then(m => {
   return m;
 }));
 
-/* ---------- 簡單 ZIP（唔壓縮）：PDF 本身已經壓縮過，再壓都細唔到幾多 ---------- */
+/* ---------- 簡單 ZIP（不壓縮）：PDF 本身已經壓縮，再壓縮亦縮減有限 ---------- */
 
 const CRC_TABLE = (() => {
   const t = new Uint32Array(256);
@@ -61,7 +61,7 @@ function makeZip(files) {
     const local = new DataView(new ArrayBuffer(30));
     local.setUint32(0, 0x04034b50, true);
     local.setUint16(4, 20, true);
-    local.setUint16(6, 0x0800, true);   // 檔名用 UTF-8（中文檔名唔會亂碼）
+    local.setUint16(6, 0x0800, true);   // 檔名用 UTF-8（中文檔名不會亂碼）
     local.setUint16(8, 0, true);        // 不壓縮
     local.setUint16(10, time, true);
     local.setUint16(12, date, true);
@@ -111,7 +111,7 @@ function saveBlob(blob, name) {
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c =>
   ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-// Windows 唔准用喺檔名嘅字元換成底線
+// 將 Windows 檔名不允許的字元換成底線
 const safeName = s => s.replace(/[\\/:*?"<>|\u0000-\u001f]/g, '_').trim();
 
 export function init() {
@@ -155,12 +155,12 @@ export function init() {
     try {
       src = await PDFLib.PDFDocument.load(bytes, { ignoreEncryption: true });
     } catch (e) {
-      setStatus('✗ 無法讀取呢個 PDF：' + (e?.message || e), 'error');
+      setStatus('✗ 無法讀取此 PDF：' + (e?.message || e), 'error');
       return;
     }
-    // 加密咗嘅 PDF 用 pdf-lib 拆出嚟會變亂碼，寧願講明做唔到
+    // 加密的 PDF 經 pdf-lib 分拆後會變成亂碼，故明確拒絕處理
     if (src.isEncrypted) {
-      setStatus('✗ 呢個 PDF 有加密保護（例如禁止修改），無法分拆。', 'error');
+      setStatus('✗ 此 PDF 設有加密保護（例如禁止修改），無法分拆。', 'error');
       return;
     }
 
@@ -189,7 +189,7 @@ export function init() {
   function renderSections() {
     secBox.innerHTML = st.sections.map((sec, i) => {
       const ok = valid(sec);
-      const count = ok ? `共 ${sec.to - sec.from + 1} 頁` : '頁數唔啱';
+      const count = ok ? `共 ${sec.to - sec.from + 1} 頁` : '頁數有誤';
       return `<div class="ps-sec${i === st.active ? ' active' : ''}${ok ? '' : ' invalid'}" data-i="${i}">
         <span class="ps-dot" style="background:${colorOf(sec)}"></span>
         <strong class="ps-label">第 ${i + 1} 份</strong>
@@ -199,20 +199,20 @@ export function init() {
         <label class="ps-name">檔名 <input type="text" class="tool-input" data-f="name" value="${esc(sec.name)}" placeholder="${esc(ok ? autoName(sec) : '')}" spellcheck="false"></label>
         <span class="ps-btns">
           <button class="btn ps-dl"${ok ? '' : ' disabled'}>下載</button>
-          <button class="btn ps-del" title="刪除呢份" aria-label="刪除第 ${i + 1} 份"${st.sections.length > 1 ? '' : ' disabled'}>🗑</button>
+          <button class="btn ps-del" title="刪除此份" aria-label="刪除第 ${i + 1} 份"${st.sections.length > 1 ? '' : ' disabled'}>🗑</button>
         </span>
       </div>`;
     }).join('');
   }
 
-  // 只更新一份嘅狀態（唔重畫輸入框，避免打字時失焦）
+  // 只更新一份的狀態（不重繪輸入框，避免輸入時失去焦點）
   function refreshRow(i) {
     const sec = st.sections[i];
     const row = secBox.querySelector(`.ps-sec[data-i="${i}"]`);
     if (!row) return;
     const ok = valid(sec);
     row.classList.toggle('invalid', !ok);
-    row.querySelector('.ps-count').textContent = ok ? `共 ${sec.to - sec.from + 1} 頁` : '頁數唔啱';
+    row.querySelector('.ps-count').textContent = ok ? `共 ${sec.to - sec.from + 1} 頁` : '頁數有誤';
     row.querySelector('[data-f="name"]').placeholder = ok ? autoName(sec) : '';
     row.querySelector('.ps-dl').disabled = !ok;
   }
@@ -287,7 +287,7 @@ export function init() {
   $('ps-zip').addEventListener('click', async e => {
     const btn = e.currentTarget;
     const bad = st.sections.findIndex(s => !valid(s));
-    if (bad >= 0) { setStatus(`✗ 第 ${bad + 1} 份嘅頁數唔啱，請先修正。`, 'error'); return; }
+    if (bad >= 0) { setStatus(`✗ 第 ${bad + 1} 份的頁數有誤，請先修正。`, 'error'); return; }
     btn.disabled = true;
     try {
       const used = new Map();
@@ -295,7 +295,7 @@ export function init() {
       for (const [i, sec] of st.sections.entries()) {
         setStatus(`分拆中… 第 ${i + 1}／${st.sections.length} 份`);
         let name = fileName(sec);
-        // 同名檔案喺 ZIP 入面會互相覆蓋，所以自動加 (2)、(3)
+        // 同名檔案在 ZIP 內會互相覆蓋，故自動加上 (2)、(3)
         const n = (used.get(name.toLowerCase()) || 0) + 1;
         used.set(name.toLowerCase(), n);
         if (n > 1) name = name.replace(/\.pdf$/i, `(${n}).pdf`);
@@ -325,18 +325,18 @@ export function init() {
     catch (e) {
       pdfjsReady = null;
       thumbs.classList.add('no-preview');
-      setStatus(`✓ 共 ${st.pages} 頁（預覽載入失敗，但仍然可以分拆）`, 'success');
+      setStatus(`✓ 共 ${st.pages} 頁（預覽載入失敗，但仍可分拆）`, 'success');
       return;
     }
     const bytes = st.bytes;
     let doc;
-    // pdf.js 會接管傳入嘅 buffer，所以畀一份副本
+    // pdf.js 會接管傳入的 buffer，故傳入副本
     try { doc = await pdfjs.getDocument({ data: bytes.slice() }).promise; }
     catch { thumbs.classList.add('no-preview'); return; }
-    if (bytes !== st.bytes) { doc.destroy(); return; } // 期間已經換咗檔案
+    if (bytes !== st.bytes) { doc.destroy(); return; } // 期間已更換檔案
     st.view = doc;
 
-    // 捲到先畫，唔好一次過畫幾百頁
+    // 捲動到可見範圍才繪製，避免一次繪製數百頁
     const io = new IntersectionObserver(entries => {
       for (const en of entries) {
         if (!en.isIntersecting) continue;
@@ -348,7 +348,7 @@ export function init() {
     thumbs.querySelectorAll('.ps-thumb').forEach(t => io.observe(t));
   }
 
-  // 按闊度縮放；有畀 maxHeight 就再收細到成頁放得入
+  // 按寬度縮放；如有 maxHeight，再縮小至整頁可完整顯示
   async function renderPage(doc, num, canvas, cssWidth, maxHeight = Infinity) {
     const page = await doc.getPage(num);
     const base = page.getViewport({ scale: 1 });
@@ -360,7 +360,7 @@ export function init() {
     await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
   }
 
-  // 按各份範圍，喺縮圖上標色
+  // 按各份範圍在縮圖上標示顏色
   function paintThumbs() {
     const act = st.sections[st.active];
     thumbs.querySelectorAll('.ps-thumb').forEach(t => {
@@ -381,7 +381,7 @@ export function init() {
     if (!st.pickEnd) {
       sec.from = sec.to = p;
       st.pickEnd = true;
-      setStatus(`第 ${st.active + 1} 份：起始頁設為 ${p}，再點一頁設結束頁。`);
+      setStatus(`第 ${st.active + 1} 份：起始頁設為 ${p}，請再點選一頁設定結束頁。`);
     } else {
       if (p < sec.from) [sec.from, sec.to] = [p, sec.from];
       else sec.to = p;
@@ -406,7 +406,7 @@ export function init() {
     if (t && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); pickPage(+t.dataset.p); }
   });
 
-  // 放大預覽，可以用左右鍵揭頁
+  // 放大預覽，可用左右鍵翻頁
   function zoom(p) {
     if (!st.view) return;
     const doc = st.view;
@@ -436,7 +436,7 @@ export function init() {
       const h = Math.max(window.innerHeight * 0.94 - body.offsetTop - 24, 200);
       const tmp = document.createElement('canvas');
       await renderPage(doc, cur, tmp, w, h).catch(() => {});
-      if (my !== token) return; // 揭得太快，舊嗰頁唔使畫
+      if (my !== token) return; // 翻頁太快時，舊頁毋須繪製
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       cv.width = tmp.width; cv.height = tmp.height;
       cv.style.width = tmp.width / dpr + 'px';
@@ -459,7 +459,7 @@ export function init() {
     show(p);
   }
 
-  /* ---------- 揀檔案 ---------- */
+  /* ---------- 選擇檔案 ---------- */
 
   input.addEventListener('change', () => { open(input.files[0]); input.value = ''; });
   drop.addEventListener('click', () => input.click());

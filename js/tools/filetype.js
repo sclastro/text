@@ -1,4 +1,4 @@
-// 檔案格式偵測 — 讀檔頭 magic number 辨認真實格式，唔靠副檔名
+// 檔案格式偵測 — 讀取檔頭 magic number 辨認真實格式，不依賴副檔名
 // 純 JS、零依賴、完全離線運作。
 
 const dec = (bytes, start, len) =>
@@ -48,7 +48,7 @@ const SIGNATURES = [
   ['OpenType 字型', 'otf', 'font/otf', b => dec(b, 0, 4) === 'OTTO'],
 ];
 
-// ZIP 容器：EPUB / DOCX / XLSX / PPTX / ODF / CBZ / JAR 都係 ZIP，要睇入面先分得出
+// ZIP 容器：EPUB / DOCX / XLSX / PPTX / ODF / CBZ / JAR 都是 ZIP，須檢視內容才能區分
 function inspectZip(bytes, text) {
   if (text.includes('mimetypeapplication/epub+zip'))
     return ['EPUB 電子書', 'epub', 'application/epub+zip', '可用「電子書轉 PDF」工具處理'];
@@ -63,15 +63,15 @@ function inspectZip(bytes, text) {
   if (text.includes('mimetypeapplication/vnd.oasis.opendocument.spreadsheet'))
     return ['OpenDocument 試算表', 'ods', 'application/vnd.oasis.opendocument.spreadsheet', ''];
   if (/\.(jpg|jpeg|png|webp)/i.test(text) && !text.includes('META-INF/'))
-    return ['漫畫壓縮檔 (CBZ) 或圖片壓縮檔', 'cbz', 'application/vnd.comicbook+zip', '內含圖片嘅 ZIP'];
+    return ['漫畫壓縮檔 (CBZ) 或圖片壓縮檔', 'cbz', 'application/vnd.comicbook+zip', '內含圖片的 ZIP'];
   if (text.includes('META-INF/MANIFEST.MF'))
     return ['Java 封存檔 (JAR)', 'jar', 'application/java-archive', ''];
   return ['ZIP 壓縮檔', 'zip', 'application/zip', ''];
 }
 
-// 唔係二進位檔就嘗試認文字格式
+// 若非二進位檔，則嘗試辨認文字格式
 function inspectText(bytes) {
-  // 有冇 NUL 或大量不可列印字元 → 當二進位
+  // 含 NUL 或大量不可列印字元 → 視為二進位
   const sample = bytes.slice(0, 512);
   let ctrl = 0;
   for (const b of sample) {
@@ -87,7 +87,7 @@ function inspectText(bytes) {
 
   let text;
   try { text = new TextDecoder('utf-8', { fatal: true }).decode(bytes.slice(0, 2048)); }
-  catch { return ['文字檔（非 UTF-8 編碼）', 'txt', 'text/plain', '可能係 Big5／GB，可用「亂碼修復」工具']; }
+  catch { return ['文字檔（非 UTF-8 編碼）', 'txt', 'text/plain', '可能是 Big5／GB 編碼，可用「亂碼修復」工具處理']; }
 
   const t = text.replace(/^﻿/, '').trimStart();
   const note = bom || 'UTF-8';
@@ -97,7 +97,7 @@ function inspectText(bytes) {
     return ['XML 文件', 'xml', 'application/xml', note];
   }
   if (/^<(!doctype html|html)[\s>]/i.test(t)) return ['HTML 網頁', 'html', 'text/html', note];
-  if (/^[{[]/.test(t)) { try { JSON.parse(text); return ['JSON 資料', 'json', 'application/json', note]; } catch { /* 可能係截斷咗 */ } }
+  if (/^[{[]/.test(t)) { try { JSON.parse(text); return ['JSON 資料', 'json', 'application/json', note]; } catch { /* 內容可能不完整 */ } }
   if (/^%!PS/.test(t)) return ['PostScript', 'ps', 'application/postscript', note];
   if (/^#!\s*\//.test(t)) return ['腳本檔（有 shebang）', 'sh', 'text/x-shellscript', t.split('\n')[0].slice(0, 40)];
   if (/^(﻿)?1\s*\r?\n\d{2}:\d{2}:\d{2}/.test(text)) return ['SRT 字幕', 'srt', 'text/plain', note];
@@ -131,7 +131,7 @@ const fmtSize = n =>
   : `${(n / 1024 ** 3).toFixed(2)} GB`;
 
 async function analyse(file) {
-  // 讀頭 8KB 就夠（MOBI 要到 offset 60，ZIP 內容特徵通常喺頭幾 KB）
+  // 讀取前 8KB 已足夠（MOBI 須讀至 offset 60，ZIP 內容特徵通常在前數 KB）
   const buf = await file.slice(0, 8192).arrayBuffer();
   const bytes = new Uint8Array(buf);
   const res = identify(bytes);
@@ -161,10 +161,10 @@ export function init() {
       try { rows.push(await analyse(f)); }
       catch (e) { rows.push({ file: f, name: '讀取失敗：' + e.message, ext: '', mime: '', note: '', confidence: '—', declared: '', matches: true }); }
     }
-    let html = '<thead><tr><th>檔名</th><th>大小</th><th>偵測到嘅格式</th><th>建議副檔名</th><th>MIME</th><th>備註</th></tr></thead><tbody>';
+    let html = '<thead><tr><th>檔名</th><th>大小</th><th>偵測到的格式</th><th>建議副檔名</th><th>MIME</th><th>備註</th></tr></thead><tbody>';
     for (const r of rows) {
       const warn = r.matches ? '' :
-        `<br><span class="ft-warn">⚠ 副檔名 .${r.declared} 同實際格式唔一致</span>`;
+        `<br><span class="ft-warn">⚠ 副檔名 .${r.declared} 與實際格式不符</span>`;
       html += `<tr>
         <td>${escapeHtml(r.file.name)}${warn}</td>
         <td>${fmtSize(r.file.size)}</td>
@@ -177,7 +177,7 @@ export function init() {
     const bad = rows.filter(r => !r.matches).length;
     status.className = bad ? 'status-line error' : 'status-line success';
     status.textContent = bad
-      ? `✓ 完成：${rows.length} 個檔案，其中 ${bad} 個副檔名同實際格式唔一致`
+      ? `✓ 完成：${rows.length} 個檔案，其中 ${bad} 個副檔名與實際格式不符`
       : `✓ 完成：${rows.length} 個檔案，副檔名全部正確`;
   }
 

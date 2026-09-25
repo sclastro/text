@@ -1,5 +1,5 @@
-// 檔案中轉站 — 手機上載，電腦下載（經你自己嘅 Cloudflare Worker）
-// Worker 網址同通行碼只存喺你部機嘅 localStorage，唔會傳去其他地方。
+// 檔案中轉站 — 手機上載，電腦下載（經使用者自己的 Cloudflare Worker）
+// Worker 網址及通行碼只存於本機的 localStorage，不會傳送到其他地方。
 
 const CFG = 'relay-config';
 const cfg = () => {
@@ -41,7 +41,7 @@ export function init() {
   const auth = () => (passIn.value || '').trim();
 
   function ready() {
-    if (!base() || !auth()) { setStatus('請先填 Worker 網址同通行碼，再撳「儲存並測試連線」。', 'error'); return false; }
+    if (!base() || !auth()) { setStatus('請先填寫 Worker 網址及通行碼，再按「儲存並測試連線」。', 'error'); return false; }
     return true;
   }
 
@@ -60,15 +60,15 @@ export function init() {
     return res;
   }
 
-  // 由 /api/ping 得知嘅伺服器設定，用嚟喺狀態列顯示上限
+  // 由 /api/ping 取得的伺服器設定，用於在狀態列顯示上限
   let limits = null;
 
-  // Workers KV 係最終一致：上載／刪除之後，list() 最多要約 60 秒先反映。
-  // 喺本機記住啱啱做過嘅改動，期間用佢哋修正伺服器傳返嚟嘅舊清單。
+  // Workers KV 屬最終一致：上載或刪除後，list() 最多約 60 秒才會反映。
+  // 在本機記錄剛完成的改動，期間以此修正伺服器傳回的舊清單。
   const PENDING_MS = 2 * 60 * 1000;
-  const added = new Map();    // id → 檔案資料（等緊出現喺清單）
-  const removed = new Map();  // id → 記錄到期時間（等緊喺清單消失）
-  let listed = [], listedDays;  // 最近一次由伺服器攞到嘅清單
+  const added = new Map();    // id → 檔案資料（等待出現於清單）
+  const removed = new Map();  // id → 紀錄到期時間（等待從清單消失）
+  let listed = [], listedDays;  // 最近一次從伺服器取得的清單
 
   function merge(files = listed) {
     const now = Date.now();
@@ -101,8 +101,8 @@ export function init() {
 
   function render(files, expireDays) {
     if (!files.length) {
-      listBox.innerHTML = '<p class="tool-desc" style="margin:0">（暫時未有檔案）</p>';
-      setStatus(`✓ 連線正常，暫時未有檔案${limitNote(expireDays)}`, 'success');
+      listBox.innerHTML = '<p class="tool-desc" style="margin:0">（暫無檔案）</p>';
+      setStatus(`✓ 連線正常，暫無檔案${limitNote(expireDays)}`, 'success');
       return;
     }
     let html = '<table class="data-table"><thead><tr><th>檔名</th><th>大小</th><th>剩餘時間</th><th>操作</th></tr></thead><tbody>';
@@ -135,11 +135,11 @@ export function init() {
         added.set(meta.id, { ...meta, until: Date.now() + PENDING_MS });
       } catch (e) { failed = `✗ ${file.name}：${e.message}`; break; }
     }
-    // 唔等 KV 同步，即刻將新檔案加入清單
+    // 不等待 KV 同步，立即將新檔案加入清單
     panel.hidden = false;
     render(merge(), listedDays);
     if (failed) setStatus(failed, 'error');
-    else setStatus(`✓ 上載完成。其他裝置約一分鐘內會喺清單見到${limitNote(listedDays)}`, 'success');
+    else setStatus(`✓ 上載完成。其他裝置約一分鐘內會在清單顯示${limitNote(listedDays)}`, 'success');
   }
 
   $('rl-save').addEventListener('click', async () => {
@@ -184,11 +184,11 @@ export function init() {
       } catch (err) { setStatus('✗ ' + err.message, 'error'); }
     }
     if (del) {
-      if (!confirm('確定要刪除呢個檔案？')) return;
+      if (!confirm('確定刪除此檔案？')) return;
       const id = del.dataset.id;
       try {
         await api('/api/file/' + id, { method: 'DELETE' });
-        // 唔等 KV 同步，即刻喺清單移除
+        // 不等待 KV 同步，立即從清單移除
         added.delete(id);
         removed.set(id, Date.now() + PENDING_MS);
         render(merge(), listedDays);
@@ -197,11 +197,11 @@ export function init() {
     }
   });
 
-  // 重開個頁面時，順便攞返伺服器設定（上限／保留日數）先至列清單
+  // 重新開啟頁面時，先取得伺服器設定（上限／保存日數），再列出清單
   if (c.url && c.pass) {
     api('/api/ping')
       .then(r => { limits = { maxMB: r.maxMB, expireDays: r.expireDays }; })
-      .catch(() => { /* 連唔到就由 refresh 報錯 */ })
+      .catch(() => { /* 無法連線時由 refresh 報錯 */ })
       .finally(refresh);
   }
 }

@@ -1,7 +1,7 @@
-// 抽獎轉盤 — 輸入學號範圍，轉盤轉完指針指住邊個就係邊個。
-// 抽中邊個喺轉之前已經用 crypto.getRandomValues 公平決定，
-// 動畫只係將轉盤停喺嗰格（停喺格內隨機位置，唔會次次正中）。
-// 設定同已抽紀錄存喺 localStorage，重開頁面唔會唔見。
+// 抽獎轉盤 — 輸入學號範圍，轉盤停下時指針所指的學號即為抽中者。
+// 抽中者在轉動前已用 crypto.getRandomValues 公平決定，
+// 動畫只負責讓轉盤停在該格（停在格內隨機位置，不會每次都在正中）。
+// 設定及已抽紀錄存於 localStorage，重新開啟頁面後仍會保留。
 
 const KEY = 'wheel-state';
 const MAX = 200;
@@ -13,7 +13,7 @@ const save = s => { try { localStorage.setItem(KEY, JSON.stringify(s)); } catch 
 const TAU = Math.PI * 2;
 const mod = (a, n) => ((a % n) + n) % n;
 
-// 0 ≤ 結果 < n，冇 modulo bias
+// 0 ≤ 結果 < n，沒有 modulo bias
 function randInt(n) {
   const buf = new Uint32Array(1), limit = Math.floor(0x100000000 / n) * n;
   do crypto.getRandomValues(buf); while (buf[0] >= limit);
@@ -52,10 +52,10 @@ export function init() {
   if (typeof saved.sound === 'boolean') sound.checked = saved.sound;
 
   let drawn = Array.isArray(saved.drawn) ? saved.drawn.filter(Number.isInteger) : [];
-  let pool = [];          // 轉盤上而家有嘅學號
+  let pool = [];          // 轉盤上現有的學號
   let rot = 0;            // 轉盤角度（弧度）
   let spinning = false;
-  let holdLast = false;   // 啱啱抽中嗰個先留喺轉盤，等大家睇清楚，下次轉先移走
+  let holdLast = false;   // 剛抽中者暫留在轉盤上讓全班看清楚，下次轉動時才移走
 
   const persist = () => save({
     from: +fromIn.value, to: +toIn.value, exclude: exIn.value,
@@ -70,7 +70,7 @@ export function init() {
   function computePool() {
     const a = parseInt(fromIn.value, 10), b = parseInt(toIn.value, 10);
     if (!Number.isInteger(a) || !Number.isInteger(b)) return { err: '請輸入學號範圍。' };
-    if (a > b) return { err: '「由」嘅學號唔可以大過「至」。' };
+    if (a > b) return { err: '「由」的學號不可大於「至」的學號。' };
     if (b - a + 1 > MAX) return { err: `最多 ${MAX} 個學號。` };
     const { set: ex, bad } = parseList(exIn.value);
     const done = new Set(noRep.checked ? drawn : []);
@@ -86,9 +86,9 @@ export function init() {
     if (r.err) { pool = []; setInfo('✗ ' + r.err, 'error'); draw(); spinBtn.disabled = true; return; }
     pool = r.list;
     const left = holdLast ? pool.length - 1 : pool.length;
-    if (r.bad.length) setInfo(`✗ 睇唔明：${r.bad.join('、')}（格式例如 5, 12, 20-22）`, 'error');
-    else if (!left && noRep.checked && r.total) setInfo('全部學號已經抽晒。㩒「重設」重新開始。', 'success');
-    else if (!r.total) setInfo('✗ 冇學號可以抽。', 'error');
+    if (r.bad.length) setInfo(`✗ 無法辨認：${r.bad.join('、')}（格式例如 5, 12, 20-22）`, 'error');
+    else if (!left && noRep.checked && r.total) setInfo('全部學號已抽完。按「重設」可重新開始。', 'success');
+    else if (!r.total) setInfo('✗ 沒有可抽的學號。', 'error');
     else setInfo(noRep.checked
       ? `轉盤上有 ${left} 個學號（全班 ${r.total} 個，已抽 ${r.total - left} 個）`
       : `轉盤上有 ${pool.length} 個學號（可重複抽中）`);
@@ -119,7 +119,7 @@ export function init() {
       return;
     }
     const seg = TAU / n;
-    // 數字一律企直寫，投影時邊個角度都睇得清楚
+    // 數字一律正向顯示，投影時任何角度都清晰可讀
     const tr = R * (n <= 8 ? 0.62 : 0.8);
     const fs = Math.max(10, Math.min(R * 0.14, tr * seg * 0.6));
     ctx.font = `700 ${fs}px system-ui, sans-serif`;
@@ -127,7 +127,7 @@ export function init() {
     ctx.textBaseline = 'middle';
     for (let i = 0; i < n; i++) {
       const a0 = rot + i * seg;
-      // 最後一格唔好同第一格同色
+      // 最後一格不可與第一格同色
       let col = COLORS[i % COLORS.length];
       if (i === n - 1 && n > 1 && i % COLORS.length === 0) col = COLORS[3];
       ctx.beginPath();
@@ -146,7 +146,7 @@ export function init() {
     ctx.strokeStyle = 'rgba(0,0,0,.25)'; ctx.lineWidth = W / 160; ctx.stroke();
   }
 
-  // 指針喺正上方（canvas 角度 -90°）；計返指住第幾格
+  // 指針位於正上方（canvas 角度 -90°）；計算所指的是第幾格
   const indexAt = r => Math.floor(mod(-Math.PI / 2 - r, TAU) / (TAU / pool.length));
 
   /* ---------- 音效 ---------- */
@@ -163,7 +163,7 @@ export function init() {
       g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
       o.connect(g).connect(audio.destination);
       o.start(t); o.stop(t + dur);
-    } catch { /* 冇聲都照轉 */ }
+    } catch { /* 沒有聲音亦照常轉動 */ }
   }
 
   /* ---------- 轉 ---------- */
@@ -177,7 +177,7 @@ export function init() {
     const k = randInt(pool.length);
     const winner = pool[k];
     const seg = TAU / pool.length;
-    const frac = 0.15 + Math.random() * 0.7;   // 停喺格內 15%–85%，避開邊界
+    const frac = 0.15 + Math.random() * 0.7;   // 停在格內 15%–85% 的位置，避開邊界
     const target = -Math.PI / 2 - (k + frac) * seg;
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
     const turns = reduce ? 1 : 5 + randInt(3);
@@ -233,13 +233,13 @@ export function init() {
   spinBtn.addEventListener('click', spin);
   $('wh-reset').addEventListener('click', () => {
     if (spinning) return;
-    if (drawn.length && !confirm('清除所有已抽紀錄，全部學號返回轉盤？')) return;
+    if (drawn.length && !confirm('清除所有已抽紀錄，讓全部學號重回轉盤？')) return;
     drawn = []; holdLast = false;
     result.textContent = ''; result.classList.remove('show');
     persist(); renderHistory(); update();
   });
 
-  // 空白鍵／Enter 抽（打緊字嗰陣唔好搶）
+  // 空白鍵／Enter 抽獎（輸入文字時不攔截）
   document.addEventListener('keydown', e => {
     if (document.getElementById('panel-wheel').hidden) return;
     if (e.target.closest('input, textarea, select, button')) return;
