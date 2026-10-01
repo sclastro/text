@@ -10,6 +10,7 @@ const TOOLS = [
   { id: 'csv', name: 'CSV 表格', cat: '格式轉換' },
   { id: 'json', name: 'JSON 格式化', cat: '格式轉換' },
   { id: 'chinesenum', name: '中文數字', cat: '格式轉換' },
+  { id: 'ytsub', name: 'YouTube 字幕整理', cat: '格式轉換' },
   { id: 'qrcode', name: 'QR Code 生成', cat: '實用工具' },
   { id: 'timezone', name: '時區轉換', cat: '實用工具' },
   { id: 'units', name: '單位換算', cat: '實用工具' },

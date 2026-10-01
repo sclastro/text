@@ -421,3 +421,8 @@ body.theme-dark .alert-warn { background: #422006; color: #fcd34d; border-color:
 .wh-stage:fullscreen .wh-result { font-size: 2.2rem; }
 .wh-stage:fullscreen .wh-num-big { font-size: 5rem; }
 @media (prefers-reduced-motion: reduce) { .wh-result.show { animation: none; } }
+
+/* YouTube 字幕整理：操作說明 */
+.yt-help { margin: 0 0 .9rem; font-size: .9rem; }
+.yt-help summary { cursor: pointer; color: var(--accent); }
+.yt-help ol { margin: .5rem 0 0; padding-left: 1.4rem; line-height: 1.8; color: var(--text-muted); }

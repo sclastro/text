@@ -41,6 +41,7 @@
         <li class="nav-item" data-tool="csv">CSV 表格</li>
         <li class="nav-item" data-tool="json">JSON 格式化</li>
         <li class="nav-item" data-tool="chinesenum">中文數字</li>
+        <li class="nav-item" data-tool="ytsub">YouTube 字幕整理</li>
 
         <li class="nav-category">實用工具</li>
         <li class="nav-item" data-tool="qrcode">QR Code 生成</li>
@@ -75,7 +76,7 @@
     <main id="content">
       <section id="panel-home" class="tool-panel">
         <h1>🀄 歡迎使用中文工具箱</h1>
-        <p class="tool-desc">26 個工具。除「檔案中轉站」須連接你自己的 Cloudflare Worker 外，全部在瀏覽器本地運行，無需後端或 API Key。請從左側選單選擇工具。</p>
+        <p class="tool-desc">27 個工具。除「檔案中轉站」須連接你自己的 Cloudflare Worker 外，全部在瀏覽器本地運行，無需後端或 API Key。請從左側選單選擇工具。</p>
         <div class="home-grid" id="home-grid"></div>
       </section>
 
@@ -253,6 +254,27 @@
         </div>
         <div id="cn-status" class="status-line"></div>
         <div class="output-wrap"><div class="out-actions"><button class="act-btn dl-btn" data-download="cn-output" data-filename="chinese-number.txt" data-smart="0">下載</button><button class="act-btn copy-btn" data-copy="cn-output">複製</button></div><textarea id="cn-output" class="tool-output" rows="3" readonly></textarea></div>
+      </section>
+
+      <section id="panel-ytsub" class="tool-panel" hidden>
+        <h2>YouTube 字幕整理</h2>
+        <p class="tool-desc">將 YouTube「字幕記錄」的文字整理為 SRT 字幕檔。全在本機處理，不會連接 YouTube。</p>
+        <details class="yt-help">
+          <summary>如何取得字幕記錄？</summary>
+          <ol>
+            <li>以電腦瀏覽器開啟 YouTube 影片（手機 App 無法複製字幕記錄）。</li>
+            <li>按影片說明欄的「…更多」，再按「顯示字幕記錄」（英文介面為 Show transcript）。</li>
+            <li>如字幕記錄有語言選單，先選擇所需語言；並確保每段文字旁有顯示時間。</li>
+            <li>在字幕記錄面板內由第一段拖曳選取至最後一段，複製後貼到下方。</li>
+          </ol>
+        </details>
+        <textarea id="yt-input" class="tool-input" rows="10" placeholder="貼上字幕記錄，例如：&#10;0:00&#10;各位同學好&#10;0:04&#10;今天我們討論……"></textarea>
+        <div class="control-row">
+          <label><input type="checkbox" id="yt-tags"> 移除 [音樂]、[掌聲] 等標記</label>
+          <button class="btn btn-primary" id="yt-run">轉換為 SRT</button>
+        </div>
+        <div id="yt-status" class="status-line"></div>
+        <div class="output-wrap"><div class="out-actions"><button class="act-btn dl-btn" data-download="yt-output" data-filename="subtitles.srt" data-smart="0">下載</button><button class="act-btn copy-btn" data-copy="yt-output">複製</button></div><textarea id="yt-output" class="tool-output" rows="12" readonly></textarea></div>
       </section>
 
       <section id="panel-qrcode" class="tool-panel" hidden>

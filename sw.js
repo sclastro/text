@@ -1,5 +1,5 @@
 // 中文工具箱 — service worker: cache app shell for offline use
-const VERSION = 'v11';
+const VERSION = 'v12';
 const CACHE = `cjk-toolbox-${VERSION}`;
 
 const PRECACHE = [
@@ -38,6 +38,7 @@ const PRECACHE = [
   'js/tools/wheel.js',
   'js/tools/whitespace.js',
   'js/tools/wordcount.js',
+  'js/tools/ytsub.js',
 ];
 
 self.addEventListener('install', event => {
