@@ -398,16 +398,11 @@
         <div id="ebk-drop" class="dropzone">
           <div class="dz-icon">📕</div>
           <div class="dz-main">將電子書拖放到此處，或按此選擇檔案</div>
-          <div class="dz-sub">.mobi · .azw3 · .epub · .fb2 · .cbz</div>
+          <div class="dz-sub">.mobi · .azw3 · .epub · .fb2 · .cbz（可一次選擇多個檔案）</div>
         </div>
-        <input type="file" id="ebk-input" class="sr-only" accept=".mobi,.azw3,.azw,.epub,.fb2,.fbz,.cbz" aria-label="選擇電子書檔案">
+        <input type="file" id="ebk-input" class="sr-only" multiple accept=".mobi,.azw3,.azw,.epub,.fb2,.fbz,.cbz" aria-label="選擇電子書檔案">
         <div id="ebk-status" class="status-line"></div>
-        <div id="ebk-info" class="info-cards"></div>
-        <div id="ebk-preview" class="ebk-preview"></div>
-        <div class="control-row" id="ebk-actions" hidden>
-          <button class="btn btn-primary" id="ebk-print">列印／另存 PDF</button>
-          <button class="btn" id="ebk-html">下載 HTML</button>
-        </div>
+        <div id="ebk-list" class="ebk-list"></div>
       </section>
 
       <section id="panel-pdfsplit" class="tool-panel" hidden>

@@ -50,7 +50,7 @@ icons/            App 圖示
 4. `sw.js`：`PRECACHE` 加 `js/tools/<id>.js`。
 5. `README.md`：功能清單及工具總數。
 
-**Service Worker 版本**：凡修改任何會被快取的檔案（HTML、CSS、JS、資料、圖示），必須將 `sw.js` 的 `VERSION` 加一（現為 `v10`），否則已安裝的使用者不會取得更新。
+**Service Worker 版本**：凡修改任何會被快取的檔案（HTML、CSS、JS、資料、圖示），必須將 `sw.js` 的 `VERSION` 加一（現為 `v11`），否則已安裝的使用者不會取得更新。
 
 **第三方 library** 一律由 CDN（jsDelivr／cdnjs）載入，不引入打包工具。部分於 `index.html` 以 `<script>` 載入，部分由工具模組按需載入（例如電子書工具的 foliate-js、PDF 分拆的 pdf-lib 及 pdf.js）。PDF 分拆的 ZIP 由 `pdfsplit.js` 內的簡單 ZIP writer 產生（不壓縮、UTF-8 檔名），毋須額外 library。
 
