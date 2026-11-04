@@ -61,7 +61,8 @@ icons/            App 圖示
 **`hidden` 屬性**：`style.css` 有 `[hidden]{display:none!important}`。功能性的 `<input type="file">` 不可用 `hidden`，應用 `.sr-only`。
 
 **檔案中轉站**（`js/tools/relay.js` ＋ `worker/file-relay.js`）：
-- Worker 網址及通行碼只存於使用者瀏覽器的 `localStorage`（鍵名 `relay-config`），repo 內沒有，亦不應寫入 repo。
+- 已部署的 Worker：`https://file-relay.sclastro.workers.dev`（Worker 名稱 `file-relay`，workers.dev 子網域 `sclastro`），採用預設值 `MAX_MB` 24 及 `EXPIRE_DAYS` 7，2026 年 11 月經手機測試連線正常。
+- 前端將 Worker 網址及通行碼存於使用者瀏覽器的 `localStorage`（鍵名 `relay-config`）。通行碼只由使用者保管，**切勿**寫入 repo 或任何程式碼。
 - Worker 綁定名稱固定：KV 為 `FILES`，Secret 為 `PASSPHRASE`；選用變數 `MAX_MB`（上限 24，受 KV 單值 25 MB 所限）及 `EXPIRE_DAYS`（預設 7）。
 - API：`POST /api/upload`、`GET /api/list`、`GET|DELETE /api/file/:id`、`GET /api/ping`，全部須 `X-Auth` 標頭。中文檔名經 `X-Filename` 以 `encodeURIComponent` 傳送。
 - 採用 Workers KV 而非 R2，因為 R2 即使在免費額度內亦須登記信用卡。
